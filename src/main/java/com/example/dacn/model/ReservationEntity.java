@@ -12,7 +12,7 @@ import java.util.Set;
 @Table(name = "reservation")
 @Getter
 @Setter
-public class ReservationEntity extends BaseEntity{
+public class ReservationEntity extends BaseEntity {
     private Double price;
     private Integer adult;
     private Integer children;
