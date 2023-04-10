@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 public class AddressEntity extends BaseEntity{
-    private String address;
+    private String street;
 
     @ManyToOne
     @JoinColumn(name = "province_id")

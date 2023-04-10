@@ -10,7 +10,7 @@ import javax.persistence.Table;
 import java.util.Date;
 
 @Entity
-@Table(name = "facility")
+@Table(name = "discount")
 @Getter
 @Setter
 public class DiscountEntity extends BaseEntity{
