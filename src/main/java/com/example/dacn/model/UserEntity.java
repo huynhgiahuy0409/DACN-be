@@ -24,9 +24,11 @@ public class UserEntity {
     private String fullName;
     private String email;
     private Date dob;
-    private String gender;
+    @Enumerated(EnumType.ORDINAL)
+    private Gender gender;
     private String phone;
-    private String status;
+    @Enumerated(EnumType.ORDINAL)
+    private UserStatus status;
 
     @Enumerated(EnumType.ORDINAL)
     private Role role;
