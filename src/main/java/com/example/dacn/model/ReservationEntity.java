@@ -1,9 +1,11 @@
 package com.example.dacn.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.example.dacn.enums.ReservationStatus;
+import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -12,19 +14,30 @@ import java.util.Set;
 @Table(name = "reservation")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class ReservationEntity extends BaseEntity {
     private Double price;
     private Integer adult;
     private Integer children;
-    private Date startDate;
-    private Date endDate;
-    private String discountPercent;
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
+    private LocalDate startDate;
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
+    private LocalDate endDate;
+    private Double discountPercent;
+    @Enumerated(EnumType.ORDINAL)
+    private ReservationStatus status;
 
     @ManyToOne
     @JoinColumn(name = "username")
     private UserEntity user;
 
-    @ManyToMany
-    @JoinTable(name = "reservation_room", joinColumns = @JoinColumn(name = "reservation_id"), inverseJoinColumns = @JoinColumn(name = "room_id"))
-    private Set<RoomEntity> rooms = new LinkedHashSet<>();
+    @ManyToOne
+    @JoinColumn(name = "room_id")
+    private RoomEntity room;
+
+    @ManyToOne
+    @JoinColumn(name = "hotel_id")
+    private HotelEntity hotel;
 }

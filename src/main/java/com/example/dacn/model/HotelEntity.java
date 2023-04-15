@@ -2,6 +2,7 @@ package com.example.dacn.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -12,7 +13,7 @@ import java.util.Set;
 @Table(name = "hotel")
 @Getter
 @Setter
-public class HotelEntity extends BaseEntity{
+public class HotelEntity extends BaseEntity {
     private String name;
     private String description;
     private Double averagePoints;
@@ -35,4 +36,10 @@ public class HotelEntity extends BaseEntity{
 
     @OneToMany(mappedBy = "hotel")
     private Set<HotelImageEntity> hotelImages = new HashSet<HotelImageEntity>();
+
+    @OneToMany(mappedBy = "hotel")
+    private Set<ReservationEntity> reservations = new LinkedHashSet<ReservationEntity>();
+
+    @OneToMany(mappedBy = "hotel")
+    private Set<CartEntity> cartItems = new LinkedHashSet<CartEntity>();
 }

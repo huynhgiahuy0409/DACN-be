@@ -11,7 +11,7 @@ import java.util.Set;
 @Table(name = "room")
 @Getter
 @Setter
-public class RoomEntity extends BaseEntity{
+public class RoomEntity extends BaseEntity {
     private String name;
     private Integer maxAdults;
     private Integer maxChildren;
@@ -45,6 +45,9 @@ public class RoomEntity extends BaseEntity{
     @OneToMany(mappedBy = "room")
     private Set<DiscountEntity> discounts = new LinkedHashSet<DiscountEntity>();
 
-    @ManyToMany(mappedBy = "rooms")
+    @OneToMany(mappedBy = "room")
     private Set<ReservationEntity> reservations = new LinkedHashSet<ReservationEntity>();
+
+    @OneToMany(mappedBy = "room")
+    private Set<CartEntity> cartItems = new LinkedHashSet<CartEntity>();
 }

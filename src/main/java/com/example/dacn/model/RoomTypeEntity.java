@@ -13,8 +13,9 @@ import java.util.Set;
 @Table(name = "room_type")
 @Getter
 @Setter
-public class RoomTypeEntity extends BaseEntity{
-
+public class RoomTypeEntity extends BaseEntity {
+    String name;
+    String code;
     @OneToMany(mappedBy = "roomType")
     private Set<RoomEntity> rooms = new LinkedHashSet<RoomEntity>();
 }

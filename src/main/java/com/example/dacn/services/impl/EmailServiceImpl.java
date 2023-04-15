@@ -27,7 +27,7 @@ public class EmailServiceImpl implements EmailService {
     private static final String CONTENT_TYPE_TEXT_HTML = "text/html;charset=\"utf-8\"";
 
     @Autowired
-    ReservationMailTemplateService thymeleafService;
+    ReservationMailTemplateService reservationMailService;
 
     public String sendReservationMail(EmailDetails details) {
         try {
@@ -46,7 +46,7 @@ public class EmailServiceImpl implements EmailService {
             Message mailMessage = new MimeMessage(session);
             mailMessage.setFrom(new InternetAddress(email));
             mailMessage.setRecipients(Message.RecipientType.TO, new InternetAddress[]{new InternetAddress(details.getRecipient())});
-            mailMessage.setContent(thymeleafService.getReservationContent(), CONTENT_TYPE_TEXT_HTML);
+            mailMessage.setContent(reservationMailService.getReservationContent(), CONTENT_TYPE_TEXT_HTML);
             mailMessage.setSubject(details.getSubject());
             Transport.send(mailMessage);
             return "Email was sent !";
