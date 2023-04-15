@@ -1,5 +1,6 @@
 package com.example.dacn.services;
 
+import com.example.dacn.enums.Role;
 import com.example.dacn.model.UserEntity;
 import com.example.dacn.repository.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (userEntity != null) {
             List<SimpleGrantedAuthority> roles = new ArrayList<SimpleGrantedAuthority>();
             if (userEntity.getRole() != null) {
-                roles.add(new SimpleGrantedAuthority(userEntity.getRole().getName()));
+                roles.add(new SimpleGrantedAuthority(userEntity.getRole().name()));
             }
             user = new User(username, userEntity.getPassword(), roles);
             return user;
