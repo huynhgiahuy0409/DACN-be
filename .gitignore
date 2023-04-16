@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+application-dev.properties
+
+/application.properties#spring.datasource.url*
+/application.properties#spring.datasource.username*
+/application.properties#spring.datasource.password*

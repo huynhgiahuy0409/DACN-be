@@ -17,6 +17,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -32,9 +33,9 @@ public class CartServiceImpl implements CartService {
     private ModelMapper mapper;
 
     @Override
-    public List<CartEntity> findBySessionId(String sessionId) {
+    public List<CartResponse> findBySessionId(String sessionId) {
         Specification<CartEntity> spec = Specification.where(CartSpecification.hasSessionId(sessionId));
-        return repository.findAll(spec);
+        return repository.findAll(spec).stream().map(i -> mapper.map(i, CartResponse.class)).collect(Collectors.toList());
     }
 
     @Override

@@ -13,6 +13,7 @@ public class EmailController {
 
     @Autowired
     private EmailService emailService;
+
     @PostMapping("/sendMail")
     public String
     sendMail(@RequestBody EmailDetails details) {

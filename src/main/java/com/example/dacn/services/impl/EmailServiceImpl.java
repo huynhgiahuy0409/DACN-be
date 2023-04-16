@@ -1,12 +1,13 @@
 package com.example.dacn.services.impl;
 
+import com.example.dacn.config.SecretProperties;
 import com.example.dacn.model.EmailDetails;
 import com.example.dacn.services.EmailService;
-import com.example.dacn.services.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -16,25 +17,35 @@ import java.util.Properties;
 @Service
 
 public class EmailServiceImpl implements EmailService {
-    @Value("${spring.mail.host}")
     private String host;
-    @Value("${spring.mail.port}")
     private String port;
-    @Value("${spring.mail.username}")
     private String email;
-    @Value("${spring.mail.password}")
     private String password;
+    private String startTls;
+    private String auth;
     private static final String CONTENT_TYPE_TEXT_HTML = "text/html;charset=\"utf-8\"";
 
     @Autowired
     ReservationMailTemplateService reservationMailService;
+    @Autowired
+    private SecretProperties secretProperties;
+
+    @PostConstruct
+    public void init() {
+        host = secretProperties.getHost();
+        port = secretProperties.getPort();
+        email = secretProperties.getEmail();
+        password = secretProperties.getPassword();
+        startTls = secretProperties.getStartTls();
+        auth = secretProperties.getAuth();
+    }
 
     public String sendReservationMail(EmailDetails details) {
         try {
             Properties props = new Properties();
             props.put("mail.smtp.host", host);
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", startTls);
+            props.put("mail.smtp.auth", auth);
             props.put("mail.smtp.port", port);
             Session session = Session.getInstance(props,
                     new Authenticator() {
