@@ -4,10 +4,11 @@ import com.example.dacn.enums.Gender;
 import com.example.dacn.enums.Role;
 import com.example.dacn.enums.UserStatus;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -16,14 +17,17 @@ import java.util.Set;
 @Table(name = "user")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserEntity {
     @Id
     private String username;
-
     private String password;
     private String fullName;
     private String email;
-    private Date dob;
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
+    private LocalDate dob;
     @Enumerated(EnumType.ORDINAL)
     private Gender gender;
     private String phone;
@@ -36,7 +40,6 @@ public class UserEntity {
 //    @ManyToOne
 //    @JoinColumn(name = "role_id")
 //    private RoleEntity role;
-
 
 
     @OneToMany(mappedBy = "user")

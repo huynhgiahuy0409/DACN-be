@@ -20,4 +20,7 @@ public class ReservationRequest {
     private String username;
     private Long hotelId;
     private Long roomId;
+    private String fullName;
+    private String email;
+    private String phone;
 }

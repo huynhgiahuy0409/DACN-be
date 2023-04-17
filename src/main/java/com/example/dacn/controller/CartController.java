@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/carts")
+@CrossOrigin("http://localhost:4200")
 public class CartController {
     @Autowired
     private CartService service;
@@ -25,7 +26,7 @@ public class CartController {
             CartResponse res = service.addToCart(cart);
             return ResponseEntity.ok().body(res);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -35,7 +36,7 @@ public class CartController {
             service.deleteCartItemById(id);
             return ResponseEntity.ok().body("Xóa thành công");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Xóa thất bại !");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Xóa thất bại !");
         }
     }
 }

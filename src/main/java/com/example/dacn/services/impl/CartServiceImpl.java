@@ -51,6 +51,7 @@ public class CartServiceImpl implements CartService {
         if (cart.getAdult() > room.getMaxAdults() || cart.getChild() > room.getMaxChildren())
             throw new Exception("Số lượng người vượt quá ngưỡng cho phép");
 
+        //find reserved list before by hotel id ,room id, from-to date
         List<Long> reservedList = reservationService.findReservationBefore(cart.getHotelId(), cart.getRoomId(), cart.getFromDate(), cart.getToDate());
         if (reservedList.size() > 0) throw new Exception("Phòng đã có khách hàng đặt vui lòng chọn phòng khác !");
         CartEntity cartEntity = CartEntity.builder()

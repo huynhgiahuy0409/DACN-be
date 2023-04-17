@@ -1,9 +1,7 @@
 package com.example.dacn.services;
 
-import com.example.dacn.model.EmailDetails;
-
-import javax.mail.MessagingException;
+import java.time.LocalDate;
 
 public interface EmailService {
-    String sendReservationMail(EmailDetails details);
+    String sendReservationMail(Long id, String to, String hotelName, String location, Double price, LocalDate startDate, LocalDate endDate);
 }

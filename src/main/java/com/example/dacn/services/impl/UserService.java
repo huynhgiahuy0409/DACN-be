@@ -1,22 +1,27 @@
 package com.example.dacn.services.impl;
 
+import com.example.dacn.dto.GuestDTO;
 import com.example.dacn.dto.UserDTO;
 import com.example.dacn.model.UserEntity;
 import com.example.dacn.repository.IUserRepository;
 import com.example.dacn.services.IUserService;
+import com.example.dacn.specification.UserSpecification;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 
+import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 @Service
-public class UserService  implements IUserService {
+public class UserService implements IUserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -43,7 +48,6 @@ public class UserService  implements IUserService {
 //    public boolean checkPassword(UserDetails userDetails, String password) {
 //        return userDetails.getPassword().equals(password);
 //    }
-
 
 
     @Override
@@ -73,9 +77,9 @@ public class UserService  implements IUserService {
     @Override
     public boolean checkExistUsername(String username) {
         UserEntity foundUser = this.userRepository.findByUsername(username);
-        if(foundUser != null){
+        if (foundUser != null) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -83,5 +87,25 @@ public class UserService  implements IUserService {
     @Override
     public UserDTO save(UserEntity user) {
         return this.mp.map(this.userRepository.save(user), UserDTO.class);
+    }
+
+    @Override
+    public UserEntity findByUsernameOrEmail(String username, String email) {
+        Specification<UserEntity> spec = Specification.where(UserSpecification.hasUsernameOrEmail(username, email));
+        List<UserEntity> list = userRepository.findAll(spec);
+        if (list.size() < 1) return null;
+        return list.get(0);
+    }
+
+    @Override
+    public UserEntity saveGuest(GuestDTO guest) {
+        UserEntity user = UserEntity.builder()
+                .username(UUID.randomUUID().toString())
+                .password(UUID.randomUUID().toString())
+                .fullName(guest.getFullName())
+                .email(guest.getEmail())
+                .phone(guest.getPhone())
+                .build();
+        return userRepository.save(user);
     }
 }

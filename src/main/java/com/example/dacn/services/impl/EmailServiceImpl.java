@@ -1,21 +1,19 @@
 package com.example.dacn.services.impl;
 
 import com.example.dacn.config.SecretProperties;
-import com.example.dacn.model.EmailDetails;
 import com.example.dacn.services.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.time.LocalDate;
 import java.util.Properties;
 
 
 @Service
-
 public class EmailServiceImpl implements EmailService {
     private String host;
     private String port;
@@ -40,7 +38,8 @@ public class EmailServiceImpl implements EmailService {
         auth = secretProperties.getAuth();
     }
 
-    public String sendReservationMail(EmailDetails details) {
+    @Override
+    public String sendReservationMail(Long id, String to, String hotelName, String location, Double price, LocalDate startDate, LocalDate endDate) {
         try {
             Properties props = new Properties();
             props.put("mail.smtp.host", host);
@@ -56,13 +55,13 @@ public class EmailServiceImpl implements EmailService {
                     });
             Message mailMessage = new MimeMessage(session);
             mailMessage.setFrom(new InternetAddress(email));
-            mailMessage.setRecipients(Message.RecipientType.TO, new InternetAddress[]{new InternetAddress(details.getRecipient())});
-            mailMessage.setContent(reservationMailService.getReservationContent(), CONTENT_TYPE_TEXT_HTML);
-            mailMessage.setSubject(details.getSubject());
+            mailMessage.setRecipients(Message.RecipientType.TO, new InternetAddress[]{new InternetAddress(to)});
+            mailMessage.setContent(reservationMailService.getReservationContent(id,hotelName, location, price, startDate, endDate), CONTENT_TYPE_TEXT_HTML);
+            mailMessage.setSubject("Đặt phòng thành công !");
             Transport.send(mailMessage);
-            return "Email was sent !";
+            return "Thành công !";
         } catch (Exception e) {
-            return "Error while Sending Mail";
+            return "Thất bại";
         }
     }
 }

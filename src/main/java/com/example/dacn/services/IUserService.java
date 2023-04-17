@@ -1,18 +1,25 @@
 package com.example.dacn.services;
 
+import com.example.dacn.dto.GuestDTO;
 import com.example.dacn.dto.UserDTO;
 import com.example.dacn.model.UserEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public interface IUserService {
 
-    public UserDTO findByUsernameDTO(String username);
-    public UserEntity findByUsername(String username);
-    public boolean checkPassword(UserDetails userDetails, String password);
+    UserDTO findByUsernameDTO(String username);
 
-    public boolean checkValidPassword(String password);
+    UserEntity findByUsername(String username);
 
-    public boolean checkExistUsername(String username);
+    boolean checkPassword(UserDetails userDetails, String password);
 
-    public UserDTO save(UserEntity user);
+    boolean checkValidPassword(String password);
+
+    boolean checkExistUsername(String username);
+
+    UserDTO save(UserEntity user);
+
+    UserEntity findByUsernameOrEmail(String username, String email);
+
+    UserEntity saveGuest(GuestDTO guest);
 }

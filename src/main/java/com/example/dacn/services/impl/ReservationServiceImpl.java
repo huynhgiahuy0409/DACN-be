@@ -1,22 +1,23 @@
 package com.example.dacn.services.impl;
 
+import com.example.dacn.dto.GuestDTO;
 import com.example.dacn.dto.request.ReservationRequest;
+import com.example.dacn.dto.response.HotelResponse;
+import com.example.dacn.dto.response.ReservationResponse;
+import com.example.dacn.dto.response.RoomResponse;
 import com.example.dacn.enums.ReservationStatus;
-import com.example.dacn.model.BaseEntity;
-import com.example.dacn.model.HotelEntity;
-import com.example.dacn.model.ReservationEntity;
+import com.example.dacn.model.*;
 import com.example.dacn.repository.ReservationRepository;
-import com.example.dacn.services.HotelService;
-import com.example.dacn.services.ReservationService;
-import com.example.dacn.services.RoomService;
+import com.example.dacn.services.*;
 import com.example.dacn.specification.ReservationSpecification;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,12 +28,31 @@ public class ReservationServiceImpl implements ReservationService {
     private HotelService hotelService;
     @Autowired
     private RoomService roomService;
+    @Autowired
+    private ModelMapper mapper;
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private IUserService userService;
 
     @Override
-    public ReservationEntity findById(Long id) throws Exception {
+    public ReservationResponse findById(Long id) throws Exception {
         Optional<ReservationEntity> foundReservation = repository.findById(id);
-        if (!foundReservation.isPresent()) throw new Exception("No reservation was found !");
-        return foundReservation.get();
+        if (!foundReservation.isPresent()) throw new Exception("Không tìm thấy đơn đặt phòng tương ứng !");
+
+        ReservationEntity reservation = foundReservation.get();
+        return ReservationResponse.builder()
+                .id(id)
+                .price(reservation.getPrice())
+                .adult(reservation.getAdult())
+                .children(reservation.getChildren())
+                .startDate(reservation.getStartDate())
+                .endDate(reservation.getEndDate())
+                .discountPercent(reservation.getDiscountPercent())
+                .status(reservation.getStatus())
+                .room(mapper.map(reservation.getRoom(), RoomResponse.class))
+                .hotel(mapper.map(reservation.getHotel(), HotelResponse.class))
+                .build();
     }
 
     @Override
@@ -42,23 +62,72 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public List<ReservationEntity> findALl() {
-        return repository.findAll();
+    public List<ReservationResponse> findAllByUsername(String username) {
+        return repository.findAll(ReservationSpecification.hasUsername(username))
+                .stream()
+                .map(reservation -> ReservationResponse.builder()
+                        .id(reservation.getId())
+                        .price(reservation.getPrice())
+                        .adult(reservation.getAdult())
+                        .children(reservation.getChildren())
+                        .startDate(reservation.getStartDate())
+                        .endDate(reservation.getEndDate())
+                        .discountPercent(reservation.getDiscountPercent())
+                        .status(reservation.getStatus())
+                        .room(mapper.map(reservation.getRoom(), RoomResponse.class))
+                        .hotel(mapper.map(reservation.getHotel(), HotelResponse.class))
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @Override
-    public ReservationEntity save(ReservationRequest request) throws Exception {
+    public ReservationResponse save(ReservationRequest request) throws Exception {
         HotelEntity hotel = hotelService.findById(request.getHotelId());
-        ReservationEntity r = ReservationEntity.builder()
+        RoomEntity room = roomService.findByHotelAndRoomId(request.getHotelId(), request.getRoomId());
+        if (null == hotel || null == room) throw new Exception("Đặt phòng thất bại do phòng không tồn tại !");
+        if (request.getAdult() > room.getMaxAdults() || request.getChildren() > room.getMaxChildren())
+            throw new Exception("Số lượng người vượt quá ngưỡng cho phép");
+        List<Long> reservedList = findReservationBefore(request.getHotelId(), request.getRoomId(), request.getStartDate(), request.getEndDate());
+        if (reservedList.size() > 0) throw new Exception("Phòng đã có khách hàng đặt vui lòng chọn phòng khác !");
+
+        UserEntity existedUser = userService.findByUsernameOrEmail(request.getUsername(), request.getEmail());
+        if (null == existedUser) {
+            GuestDTO guest = GuestDTO.builder()
+                    .username(UUID.randomUUID().toString())
+                    .password(UUID.randomUUID().toString())
+                    .fullName(request.getFullName())
+                    .email(request.getEmail())
+                    .phone(request.getPhone())
+                    .build();
+            existedUser = userService.saveGuest(guest);
+        }
+
+        ReservationEntity reservation = ReservationEntity.builder()
                 .adult(request.getAdult())
                 .discountPercent(request.getDiscountPercent())
+                .price(request.getPrice())
                 .children(request.getChildren())
                 .endDate(request.getEndDate())
                 .startDate(request.getStartDate())
                 .hotel(hotel)
-                .room(roomService.findByHotelAndRoomId(request.getHotelId(), request.getRoomId()))
+                .room(room)
+                .user(existedUser)
                 .status(ReservationStatus.PENDING)
                 .build();
-        return repository.save(r);
+        ReservationEntity savedEntity = repository.save(reservation);
+        emailService.sendReservationMail(savedEntity.getId(), request.getEmail(), hotel.getName(),
+                hotel.getAddress().getProvince().get_name(), request.getPrice(), request.getStartDate(), request.getEndDate());
+        return ReservationResponse.builder()
+                .id(savedEntity.getId())
+                .price(savedEntity.getPrice())
+                .adult(savedEntity.getAdult())
+                .children(savedEntity.getChildren())
+                .startDate(savedEntity.getStartDate())
+                .endDate(savedEntity.getEndDate())
+                .discountPercent(savedEntity.getDiscountPercent())
+                .status(savedEntity.getStatus())
+                .room(mapper.map(savedEntity.getRoom(), RoomResponse.class))
+                .hotel(mapper.map(savedEntity.getHotel(), HotelResponse.class))
+                .build();
     }
 }

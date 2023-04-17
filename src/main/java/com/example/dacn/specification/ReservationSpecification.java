@@ -24,4 +24,12 @@ public class ReservationSpecification {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
+
+    public static Specification<ReservationEntity> hasUsername(String username) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("user").get("username"), username));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
 }
