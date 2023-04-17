@@ -1,5 +1,6 @@
 package com.example.dacn.controller;
 
+import com.example.dacn.dto.request.CancelReservationRequest;
 import com.example.dacn.dto.request.ReservationRequest;
 import com.example.dacn.dto.response.ReservationResponse;
 import com.example.dacn.services.ReservationService;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/reservations")
+@CrossOrigin("http://localhost:4200")
 public class ReservationController {
     @Autowired
     private ReservationService service;
@@ -40,6 +42,16 @@ public class ReservationController {
     public ResponseEntity<?> saveReservation(@RequestBody ReservationRequest request) {
         try {
             ReservationResponse reservationResponse = service.save(request);
+            return ResponseEntity.ok().body(reservationResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/cancelReservation")
+    public ResponseEntity<?> cancelReservation(@RequestBody CancelReservationRequest request) {
+        try {
+            ReservationResponse reservationResponse = service.cancelReservation(request.getId(), request.getUsername());
             return ResponseEntity.ok().body(reservationResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

@@ -117,17 +117,32 @@ public class ReservationServiceImpl implements ReservationService {
         ReservationEntity savedEntity = repository.save(reservation);
         emailService.sendReservationMail(savedEntity.getId(), request.getEmail(), hotel.getName(),
                 hotel.getAddress().getProvince().get_name(), request.getPrice(), request.getStartDate(), request.getEndDate());
+        return getReservationResponse(savedEntity);
+    }
+
+    @Override
+    public ReservationResponse cancelReservation(Long id, String username) throws Exception {
+        Optional<ReservationEntity> foundReservation = repository.findById(id);
+        if (!foundReservation.isPresent() || !foundReservation.get().getUser().getUsername().equals(username))
+            throw new Exception("Không tìm thấy đơn đặt phòng tương ứng !");
+        ReservationEntity reservation = foundReservation.get();
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        ReservationEntity updatedReservation = repository.save(reservation);
+        return getReservationResponse(updatedReservation);
+    }
+
+    private ReservationResponse getReservationResponse(ReservationEntity updatedReservation) {
         return ReservationResponse.builder()
-                .id(savedEntity.getId())
-                .price(savedEntity.getPrice())
-                .adult(savedEntity.getAdult())
-                .children(savedEntity.getChildren())
-                .startDate(savedEntity.getStartDate())
-                .endDate(savedEntity.getEndDate())
-                .discountPercent(savedEntity.getDiscountPercent())
-                .status(savedEntity.getStatus())
-                .room(mapper.map(savedEntity.getRoom(), RoomResponse.class))
-                .hotel(mapper.map(savedEntity.getHotel(), HotelResponse.class))
+                .id(updatedReservation.getId())
+                .price(updatedReservation.getPrice())
+                .adult(updatedReservation.getAdult())
+                .children(updatedReservation.getChildren())
+                .startDate(updatedReservation.getStartDate())
+                .endDate(updatedReservation.getEndDate())
+                .discountPercent(updatedReservation.getDiscountPercent())
+                .status(updatedReservation.getStatus())
+                .room(mapper.map(updatedReservation.getRoom(), RoomResponse.class))
+                .hotel(mapper.map(updatedReservation.getHotel(), HotelResponse.class))
                 .build();
     }
 }
