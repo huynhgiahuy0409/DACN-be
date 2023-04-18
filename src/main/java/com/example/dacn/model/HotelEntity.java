@@ -42,4 +42,7 @@ public class HotelEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "hotel")
     private Set<CartEntity> cartItems = new LinkedHashSet<CartEntity>();
+
+    @OneToMany(mappedBy = "hotel")
+    private Set<UserRating> ratings = new LinkedHashSet<UserRating>();
 }

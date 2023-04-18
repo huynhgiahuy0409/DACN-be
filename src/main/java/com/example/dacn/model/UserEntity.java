@@ -44,4 +44,6 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user")
     private Set<ReservationEntity> reservations = new LinkedHashSet<ReservationEntity>();
+    @OneToMany(mappedBy = "user")
+    private Set<UserRating> ratings = new LinkedHashSet<UserRating>();
 }

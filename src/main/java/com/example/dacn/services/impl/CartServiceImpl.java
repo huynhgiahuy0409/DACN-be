@@ -2,8 +2,11 @@ package com.example.dacn.services.impl;
 
 import com.example.dacn.dto.request.CartRequest;
 import com.example.dacn.dto.response.CartResponse;
+import com.example.dacn.dto.response.HotelResponse;
+import com.example.dacn.dto.response.RoomResponse;
 import com.example.dacn.model.CartEntity;
 import com.example.dacn.model.HotelEntity;
+import com.example.dacn.model.HotelImageEntity;
 import com.example.dacn.model.RoomEntity;
 import com.example.dacn.repository.CartRepository;
 import com.example.dacn.services.CartService;
@@ -14,9 +17,13 @@ import com.example.dacn.specification.CartSpecification;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +42,21 @@ public class CartServiceImpl implements CartService {
     @Override
     public List<CartResponse> findBySessionId(String sessionId) {
         Specification<CartEntity> spec = Specification.where(CartSpecification.hasSessionId(sessionId));
-        return repository.findAll(spec).stream().map(i -> mapper.map(i, CartResponse.class)).collect(Collectors.toList());
+        return repository.findAll(spec).stream().map(i ->
+                CartResponse.builder()
+                        .id(i.getId())
+                        .adult(i.getAdult())
+                        .child(i.getChild())
+                        .fromDate(i.getFromDate())
+                        .toDate(i.getToDate())
+                        .hotel(mapper.map(i.getHotel(), HotelResponse.class))
+                        .room(mapper.map(i.getRoom(), RoomResponse.class))
+                        .sessionId(i.getSessionId())
+                        .address(i.getHotel().getAddress().getProvince().get_name())
+                        .bannerImage(findFirstThumbnail(i.getHotel().getHotelImages()))
+                        .totalReviews(i.getHotel().getRatings().size())
+                        .build()
+        ).collect(Collectors.toList());
     }
 
     @Override
@@ -74,5 +95,13 @@ public class CartServiceImpl implements CartService {
         } catch (Exception e) {
             throw new Exception("Xóa thất bại !");
         }
+    }
+
+    private String findFirstThumbnail(Set<HotelImageEntity> images) {
+        Optional<HotelImageEntity> image = images.stream()
+                .filter(item -> item.getIsThumbnail().equals(true))
+                .findFirst();
+        if (!image.isPresent()) return "";
+        return image.get().getUrl();
     }
 }

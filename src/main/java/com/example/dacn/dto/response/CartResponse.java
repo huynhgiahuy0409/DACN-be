@@ -1,11 +1,13 @@
 package com.example.dacn.dto.response;
 
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
 @Data
+@Builder
 public class CartResponse {
     private Long id;
     private Integer adult;
@@ -17,4 +19,7 @@ public class CartResponse {
     private HotelResponse hotel;
     private RoomResponse room;
     private String sessionId;
+    private String address;
+    private String bannerImage;
+    private Integer totalReviews;
 }

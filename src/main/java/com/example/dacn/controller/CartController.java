@@ -2,6 +2,7 @@ package com.example.dacn.controller;
 
 import com.example.dacn.dto.request.CartRequest;
 import com.example.dacn.dto.response.CartResponse;
+import com.example.dacn.responsemodel.APIResponse;
 import com.example.dacn.services.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/carts")
+@RequestMapping("/api/carts")
 @CrossOrigin("http://localhost:4200")
 public class CartController {
     @Autowired
@@ -34,9 +35,11 @@ public class CartController {
     public ResponseEntity<?> deleteItemFromCart(@RequestParam("id") Long id) {
         try {
             service.deleteCartItemById(id);
-            return ResponseEntity.ok().body("Xóa thành công");
+            APIResponse response = new APIResponse(new String("Xóa thành công"), "Xóa thành công", 200);
+            return ResponseEntity.ok().body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Xóa thất bại !");
+            APIResponse response = new APIResponse(new String("Xóa thất bại"), "Xóa thất bại", 400);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 }
