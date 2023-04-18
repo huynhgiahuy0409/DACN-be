@@ -1,6 +1,7 @@
 package com.example.dacn.services.impl;
 
 import com.example.dacn.dto.request.CartRequest;
+import com.example.dacn.dto.response.BenefitResponse;
 import com.example.dacn.dto.response.CartResponse;
 import com.example.dacn.dto.response.HotelResponse;
 import com.example.dacn.dto.response.RoomResponse;
@@ -17,10 +18,8 @@ import com.example.dacn.specification.CartSpecification;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -55,6 +54,8 @@ public class CartServiceImpl implements CartService {
                         .address(i.getHotel().getAddress().getProvince().get_name())
                         .bannerImage(findFirstThumbnail(i.getHotel().getHotelImages()))
                         .totalReviews(i.getHotel().getRatings().size())
+                        .roomType(i.getRoom().getRoomType().getName())
+                        .benefits(i.getRoom().getBenefits().stream().map(item -> mapper.map(item, BenefitResponse.class)).collect(Collectors.toSet()))
                         .build()
         ).collect(Collectors.toList());
     }

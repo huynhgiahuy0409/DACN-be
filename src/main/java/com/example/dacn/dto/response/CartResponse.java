@@ -1,10 +1,12 @@
 package com.example.dacn.dto.response;
 
+import com.example.dacn.model.BenefitEntity;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
@@ -22,4 +24,6 @@ public class CartResponse {
     private String address;
     private String bannerImage;
     private Integer totalReviews;
+    private String roomType;
+    private Set<BenefitResponse> benefits;
 }

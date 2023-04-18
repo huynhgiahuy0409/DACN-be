@@ -16,4 +16,6 @@ public interface ReservationService {
     ReservationResponse save(ReservationRequest request) throws Exception;
 
     ReservationResponse cancelReservation(Long id, String username) throws Exception;
+
+    List<ReservationResponse> saveAll(List<ReservationRequest> request);
 }

@@ -48,6 +48,16 @@ public class ReservationController {
         }
     }
 
+    @PostMapping("/saveAllReservation")
+    public ResponseEntity<?> saveAllReservation(@RequestBody List<ReservationRequest> request) {
+        try {
+            List<ReservationResponse> reservationResponse = service.saveAll(request);
+            return ResponseEntity.ok().body(reservationResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @PostMapping("/cancelReservation")
     public ResponseEntity<?> cancelReservation(@RequestBody CancelReservationRequest request) {
         try {
@@ -57,4 +67,5 @@ public class ReservationController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
 }

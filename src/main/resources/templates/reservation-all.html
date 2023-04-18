@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+        }
+
+        .bg-secondary {
+            background-color: #f5f5f5;
+        }
+
+        .d-flex {
+            display: flex;
+        }
+
+        .justify-content-center {
+            justify-content: center !important;
+        }
+
+        .container {
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+            min-height: 50vh;
+        }
+
+        .bg-white {
+            background-color: white;
+        }
+
+        .content {
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 2em;
+            border-radius: 5px;
+            padding: 1em;
+        }
+
+        .customer-name {
+            color: orange;
+        }
+
+        .w-fit {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container bg-secondary">
+    <div class="d-flex justify-content-center">
+        <img src="https://raw.githubusercontent.com/hadesdday/a/main/logo-hotel.png" alt="" style="width: 100px;">
+    </div>
+    <div class="bg-white content">
+        <p class="customer-name w-fit" th:text="'Hi '+${name}+','"></p>
+        <p>Chúng tôi muốn xác nhận rằng bạn đã đặt phòng thành công. Để xem, hủy các phòng bạn đã đặt, hãy truy cập
+            vào trang quản lý đơn đặt phòng của bạn để thực hiện.</p>
+        <a href="http://localhost:4200/my-booking">
+            <button
+                    style="background-color: #448bf4;color: white;font-weight: 600;border-radius:3px;padding: 1em 2em;border: none;cursor: pointer;">
+                ĐƠN
+                ĐẶT
+                CỦA
+                TÔI
+            </button>
+        </a>
+    </div>
+</div>
+</body>
+
+</html>

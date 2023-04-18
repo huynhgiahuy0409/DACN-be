@@ -1,6 +1,7 @@
 package com.example.dacn.services.impl;
 
 import com.example.dacn.dto.GuestDTO;
+import com.example.dacn.dto.HotelRoomDto;
 import com.example.dacn.dto.request.ReservationRequest;
 import com.example.dacn.dto.response.HotelResponse;
 import com.example.dacn.dto.response.ReservationResponse;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -131,6 +133,23 @@ public class ReservationServiceImpl implements ReservationService {
         return getReservationResponse(updatedReservation);
     }
 
+    @Override
+    public List<ReservationResponse> saveAll(List<ReservationRequest> request) {
+        try {
+            List<ReservationResponse> responseList = new ArrayList<>();
+            for (ReservationRequest req : request) {
+                HotelRoomDto dto = checkReservedBefore(req);
+                if (dto != null) {
+                    responseList.add(saveWithoutSendMail(req, dto.getHotel(), dto.getRoom()));
+                }
+            }
+            emailService.sendReservationAllMail(request.get(0).getFullName(), request.get(0).getEmail());
+            return responseList;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private ReservationResponse getReservationResponse(ReservationEntity updatedReservation) {
         return ReservationResponse.builder()
                 .id(updatedReservation.getId())
@@ -144,5 +163,52 @@ public class ReservationServiceImpl implements ReservationService {
                 .room(mapper.map(updatedReservation.getRoom(), RoomResponse.class))
                 .hotel(mapper.map(updatedReservation.getHotel(), HotelResponse.class))
                 .build();
+    }
+
+    private HotelRoomDto checkReservedBefore(ReservationRequest request) {
+        try {
+            HotelEntity hotel = hotelService.findById(request.getHotelId());
+            RoomEntity room = roomService.findByHotelAndRoomId(request.getHotelId(), request.getRoomId());
+            if (null == hotel || null == room) throw new Exception("Đặt phòng thất bại do phòng không tồn tại !");
+            if (request.getAdult() > room.getMaxAdults() || request.getChildren() > room.getMaxChildren())
+                throw new Exception("Số lượng người vượt quá ngưỡng cho phép");
+            List<Long> reservedList = findReservationBefore(request.getHotelId(), request.getRoomId(), request.getStartDate(), request.getEndDate());
+            if (reservedList.size() > 0) throw new Exception("Phòng đã có khách hàng đặt vui lòng chọn phòng khác !");
+            return HotelRoomDto.builder()
+                    .hotel(hotel)
+                    .room(room)
+                    .build();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public ReservationResponse saveWithoutSendMail(ReservationRequest request, HotelEntity hotel, RoomEntity room) {
+        UserEntity existedUser = userService.findByUsernameOrEmail(request.getUsername(), request.getEmail());
+        if (null == existedUser) {
+            GuestDTO guest = GuestDTO.builder()
+                    .username(UUID.randomUUID().toString())
+                    .password(UUID.randomUUID().toString())
+                    .fullName(request.getFullName())
+                    .email(request.getEmail())
+                    .phone(request.getPhone())
+                    .build();
+            existedUser = userService.saveGuest(guest);
+        }
+
+        ReservationEntity reservation = ReservationEntity.builder()
+                .adult(request.getAdult())
+                .discountPercent(request.getDiscountPercent())
+                .price(request.getPrice())
+                .children(request.getChildren())
+                .endDate(request.getEndDate())
+                .startDate(request.getStartDate())
+                .hotel(hotel)
+                .room(room)
+                .user(existedUser)
+                .status(ReservationStatus.PENDING)
+                .build();
+        ReservationEntity savedEntity = repository.save(reservation);
+        return getReservationResponse(savedEntity);
     }
 }

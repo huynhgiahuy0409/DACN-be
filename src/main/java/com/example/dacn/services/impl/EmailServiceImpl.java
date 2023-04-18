@@ -56,7 +56,34 @@ public class EmailServiceImpl implements EmailService {
             Message mailMessage = new MimeMessage(session);
             mailMessage.setFrom(new InternetAddress(email));
             mailMessage.setRecipients(Message.RecipientType.TO, new InternetAddress[]{new InternetAddress(to)});
-            mailMessage.setContent(reservationMailService.getReservationContent(id,hotelName, location, price, startDate, endDate), CONTENT_TYPE_TEXT_HTML);
+            mailMessage.setContent(reservationMailService.getReservationContent(id, hotelName, location, price, startDate, endDate), CONTENT_TYPE_TEXT_HTML);
+            mailMessage.setSubject("Đặt phòng thành công !");
+            Transport.send(mailMessage);
+            return "Thành công !";
+        } catch (Exception e) {
+            return "Thất bại";
+        }
+    }
+
+    @Override
+    public String sendReservationAllMail(String name, String to) {
+        try {
+            Properties props = new Properties();
+            props.put("mail.smtp.host", host);
+            props.put("mail.smtp.starttls.enable", startTls);
+            props.put("mail.smtp.auth", auth);
+            props.put("mail.smtp.port", port);
+            Session session = Session.getInstance(props,
+                    new Authenticator() {
+                        @Override
+                        protected PasswordAuthentication getPasswordAuthentication() {
+                            return new PasswordAuthentication(email, password);
+                        }
+                    });
+            Message mailMessage = new MimeMessage(session);
+            mailMessage.setFrom(new InternetAddress(email));
+            mailMessage.setRecipients(Message.RecipientType.TO, new InternetAddress[]{new InternetAddress(to)});
+            mailMessage.setContent(reservationMailService.getReservationAllContent(name), CONTENT_TYPE_TEXT_HTML);
             mailMessage.setSubject("Đặt phòng thành công !");
             Transport.send(mailMessage);
             return "Thành công !";

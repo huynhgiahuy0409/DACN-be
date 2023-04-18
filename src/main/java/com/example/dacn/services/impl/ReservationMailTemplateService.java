@@ -70,4 +70,10 @@ public class ReservationMailTemplateService {
         context.setVariable("id", id);
         return templateEngine.process(TEMPLATE_NAME, context);
     }
+
+    public String getReservationAllContent(String name) {
+        final Context context = new Context();
+        context.setVariable("name", name);
+        return templateEngine.process("reservation-all", context);
+    }
 }
