@@ -11,4 +11,6 @@ public interface CartService {
     CartResponse addToCart(CartRequest cart) throws Exception;
 
     void deleteCartItemById(Long id) throws Exception;
+
+    void deleteByIds(List<Long> ids) throws Exception;
 }

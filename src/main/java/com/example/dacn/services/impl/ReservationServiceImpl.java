@@ -36,6 +36,8 @@ public class ReservationServiceImpl implements ReservationService {
     private EmailService emailService;
     @Autowired
     private IUserService userService;
+    @Autowired
+    private CartService cartService;
 
     @Override
     public ReservationResponse findById(Long id) throws Exception {

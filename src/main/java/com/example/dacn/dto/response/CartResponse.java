@@ -1,5 +1,6 @@
 package com.example.dacn.dto.response;
 
+import com.example.dacn.enums.RoomStatus;
 import com.example.dacn.model.BenefitEntity;
 import lombok.Builder;
 import lombok.Data;
@@ -26,4 +27,5 @@ public class CartResponse {
     private Integer totalReviews;
     private String roomType;
     private Set<BenefitResponse> benefits;
+    private RoomStatus status;
 }

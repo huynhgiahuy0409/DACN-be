@@ -1,10 +1,13 @@
 package com.example.dacn.services.impl;
 
+import com.example.dacn.dto.HotelRoomDto;
 import com.example.dacn.dto.request.CartRequest;
+import com.example.dacn.dto.request.ReservationRequest;
 import com.example.dacn.dto.response.BenefitResponse;
 import com.example.dacn.dto.response.CartResponse;
 import com.example.dacn.dto.response.HotelResponse;
 import com.example.dacn.dto.response.RoomResponse;
+import com.example.dacn.enums.RoomStatus;
 import com.example.dacn.model.CartEntity;
 import com.example.dacn.model.HotelEntity;
 import com.example.dacn.model.HotelImageEntity;
@@ -20,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -56,6 +61,7 @@ public class CartServiceImpl implements CartService {
                         .totalReviews(i.getHotel().getRatings().size())
                         .roomType(i.getRoom().getRoomType().getName())
                         .benefits(i.getRoom().getBenefits().stream().map(item -> mapper.map(item, BenefitResponse.class)).collect(Collectors.toSet()))
+                        .status(isReservedBefore(i.getHotel(), i.getRoom(), i.getFromDate(), i.getToDate()))
                         .build()
         ).collect(Collectors.toList());
     }
@@ -91,11 +97,13 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void deleteCartItemById(Long id) throws Exception {
-        try {
-            repository.deleteById(id);
-        } catch (Exception e) {
-            throw new Exception("Xóa thất bại !");
-        }
+        repository.deleteById(id);
+    }
+
+    @Override
+    @Transactional // delete by each id in list
+    public void deleteByIds(List<Long> ids) throws Exception {
+        repository.deleteByIdIn(ids);
     }
 
     private String findFirstThumbnail(Set<HotelImageEntity> images) {
@@ -104,5 +112,18 @@ public class CartServiceImpl implements CartService {
                 .findFirst();
         if (!image.isPresent()) return "";
         return image.get().getUrl();
+    }
+
+    private RoomStatus isReservedBefore(HotelEntity hotel, RoomEntity room, LocalDate startDate, LocalDate endDate) {
+        try {
+            if (null == hotel || null == room) return RoomStatus.UNDEFINED;
+            List<Long> reservedList = reservationService.findReservationBefore(hotel.getId(), room.getId(), startDate, endDate);
+            if (reservedList.size() > 0)
+                return RoomStatus.RESERVED;
+            else
+                return RoomStatus.AVAILABLE;
+        } catch (Exception e) {
+            return RoomStatus.UNDEFINED;
+        }
     }
 }
