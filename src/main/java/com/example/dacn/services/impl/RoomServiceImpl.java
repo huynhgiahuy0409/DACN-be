@@ -1,12 +1,14 @@
 package com.example.dacn.services.impl;
 
 import com.example.dacn.dto.response.RoomResponse;
+import com.example.dacn.model.DiscountEntity;
 import com.example.dacn.model.RoomEntity;
 import com.example.dacn.repository.RoomRepository;
 import com.example.dacn.services.RoomService;
 import com.example.dacn.specification.RoomSpecification;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,5 +31,19 @@ public class RoomServiceImpl implements RoomService {
         foundRoom.setStatus(status);
         repository.save(foundRoom);
         return mapper.map(foundRoom, RoomResponse.class);
+    }
+
+    @Override
+    public RoomEntity findOne(Specification<RoomEntity> spec) {
+        return this.repository.findOne(spec).get();
+    }
+
+    @Override
+    public Double computeFinalPrice(RoomEntity room) {
+        double finalPrice = 0;
+        DiscountEntity roomDiscount = room.getDiscount();
+        Double truthPercent = 100 - roomDiscount.getDiscountPercent();
+        finalPrice += (room.getRentalPrice() * (truthPercent / 100));
+        return finalPrice;
     }
 }

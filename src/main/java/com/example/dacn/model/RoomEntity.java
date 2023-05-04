@@ -18,6 +18,8 @@ public class RoomEntity extends BaseEntity {
     private String status;
     private Double originPrice;
     private Double rentalPrice;
+    private Boolean isDeals;
+
 
     @ManyToOne
     @JoinColumn(name = "room_type_id")
@@ -42,8 +44,9 @@ public class RoomEntity extends BaseEntity {
     @JoinTable(name = "room_payment_method", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "payment_method"))
     private Set<PaymentMethodEntity> paymentMethods = new LinkedHashSet<PaymentMethodEntity>();
 
-    @OneToMany(mappedBy = "room")
-    private Set<DiscountEntity> discounts = new LinkedHashSet<DiscountEntity>();
+    @ManyToOne
+    @JoinColumn(name = "discount_id")
+    private DiscountEntity discount;
 
     @OneToMany(mappedBy = "room")
     private Set<ReservationEntity> reservations = new LinkedHashSet<ReservationEntity>();
