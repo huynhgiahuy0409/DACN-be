@@ -3,6 +3,7 @@ package com.example.dacn.controller;
 import com.example.dacn.dto.response.AutocompleteSearchResponse;
 import com.example.dacn.model.*;
 import com.example.dacn.requestmodel.ProductFilterRequest;
+import com.example.dacn.requestmodel.ProductSortRequest;
 import com.example.dacn.responsemodel.APIResponse;
 import com.example.dacn.responsemodel.AddressResponse;
 import com.example.dacn.responsemodel.DiscountResponse;
@@ -12,11 +13,13 @@ import com.example.dacn.services.IBenefitService;
 import com.example.dacn.services.IProvinceService;
 import com.example.dacn.services.RoomService;
 import com.example.dacn.specification.BenefitSpecification;
+import com.example.dacn.specification.HotelSpecification;
 import com.example.dacn.specification.RoomSpecification;
 import com.example.dacn.specification.builder.HotelSpecificationBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +48,7 @@ public class HotelController {
         HotelSpecificationBuilder hotelBuilder = new HotelSpecificationBuilder();
         HotelSpecificationBuilder locationBuilder = new HotelSpecificationBuilder();
         hotelBuilder.with("name", searchValue, "like");
-        locationBuilder.with("_domain", searchValue, "location-like");
+        locationBuilder.with("_domain", searchValue, "province-like");
         Specification<HotelEntity> specification = hotelBuilder.build();
         Specification<HotelEntity> localtionSpecification = locationBuilder.build();
         Pageable pageable = PageRequest.of(0, 3);
@@ -88,24 +91,23 @@ public class HotelController {
         Set<HotelEntity> foundHotels = new LinkedHashSet<>();
         ProvinceEntity searchedHotelProvince;
         if (productFilterRequest.getHotelId() != null) {
-            HotelSpecificationBuilder searchedHotelBuilder = new HotelSpecificationBuilder();
-            Specification<HotelEntity> searchedHotelSpec = searchedHotelBuilder.with("name", productFilterRequest.getSearch(), "equals").build();
-            HotelEntity searchedHotel = this.hotelService.findAll(searchedHotelSpec).get(0);
+            HotelEntity searchedHotel = this.hotelService.findOne(productFilterRequest.getHotelId());
             searchedHotelProvince = searchedHotel.getAddress().getProvince();
             foundHotels.add(searchedHotel);
         } else {
             searchedHotelProvince = provinceService.findBy_domain(productFilterRequest.getSearch());
         }
         HotelSpecificationBuilder relativeHotelBuilder = new HotelSpecificationBuilder();
-        relativeHotelBuilder.with("_domain", searchedHotelProvince.get_domain(), "province-like");
-        List<HotelEntity> sameProvinceHotels = this.hotelService.findAll(relativeHotelBuilder.build());
-        System.out.println(sameProvinceHotels.size());
+        Specification<HotelEntity> relativeHotelSpec = relativeHotelBuilder.with("_domain", searchedHotelProvince.get_domain(), "province-like").with("maxAdults", productFilterRequest.getAdults(), "valid room capacity").with("maxChildren", productFilterRequest.getChildren(), "valid room capacity").build();
+        if(productFilterRequest.getProductSortRequest() != null){
+            relativeHotelSpec = relativeHotelBuilder.with("_domain", searchedHotelProvince.get_domain(), "province-like").with("maxAdults", productFilterRequest.getAdults(), "valid room capacity").with("maxChildren", productFilterRequest.getChildren(), "valid room capacity").build().and(HotelSpecification.sortByAscProperty(productFilterRequest.getProductSortRequest().getProperty()));
+        }
+        List<HotelEntity> sameProvinceHotels =  this.hotelService.findAll(relativeHotelSpec);
         for (HotelEntity sameProvinceHotel : sameProvinceHotels) {
             if (!foundHotels.contains(sameProvinceHotel)) {
                 foundHotels.add(sameProvinceHotel);
             }
         }
-        System.out.println(foundHotels.size());
         for (HotelEntity foundHotel : foundHotels) {
             SearchedProductItemResponse searchedProductItem = new SearchedProductItemResponse();
             if (foundHotel.getName().equals(productFilterRequest.getSearch()) && productFilterRequest.getHotelId() != null) {
@@ -119,18 +121,18 @@ public class HotelController {
             AddressResponse addressResponse = new AddressResponse(foundHotelAddress.getId(), foundHotelAddress.getStreet(), foundHotelAddress.getProvince().get_domain(), foundHotelAddress.getDistrict().get_prefix() + " " + foundHotelAddress.getDistrict().get_name(), foundHotelAddress.getWard().get_prefix() + " " + foundHotelAddress.getWard().get_name());
             searchedProductItem.setAddress(addressResponse);
             searchedProductItem.setStartRating(this.hotelService.computeStarRating(foundHotel.getAveragePoints()));
-            Specification<RoomEntity> cheapestRoomSpec = RoomSpecification.getCheapestRoomByHotelId(foundHotel.getId());
-            RoomEntity cheapestRoom = this.roomService.findOne(cheapestRoomSpec);
+            Specification<RoomEntity> searchedRoom = RoomSpecification.findCheapestRoomWithValidCapacity(foundHotel.getId(), productFilterRequest.getAdults(), productFilterRequest.getChildren());
+            RoomEntity cheapestRoom = this.roomService.findOne(searchedRoom);
             searchedProductItem.setOriginalPrice(cheapestRoom.getOriginPrice());
             searchedProductItem.setRentalPrice(cheapestRoom.getRentalPrice());
             searchedProductItem.setAverageRating(this.hotelService.getAverageRatingResponse(foundHotel));
-            searchedProductItem.setIsDeals(cheapestRoom.getIsDeals());
+            searchedProductItem.setIsDeals(foundHotel.getIsDeals());
             DiscountEntity roomDiscount = cheapestRoom.getDiscount();
             DiscountResponse discountResponse = new DiscountResponse();
             discountResponse.setName(roomDiscount.getName());
             discountResponse.setPercent(roomDiscount.getDiscountPercent());
             searchedProductItem.setDiscount(discountResponse);
-            searchedProductItem.setFinalPrice(this.roomService.computeFinalPrice(cheapestRoom));
+            searchedProductItem.setFinalPrice(cheapestRoom.getFinalPrice());
             searchedProductItem.setIsOnlinePayment(cheapestRoom.getPaymentMethods().size() > 0 ? true : false);
             searchedProductItem.setIsFreeCancellation(foundHotel.getIsFreeCancellation());
             data.add(searchedProductItem);

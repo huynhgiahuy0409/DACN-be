@@ -6,8 +6,10 @@ import com.example.dacn.responsemodel.AverageRatingResponse;
 import com.example.dacn.services.HotelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,18 +28,30 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
+    @Transactional
     public List<HotelEntity> findAll(Specification specification, Pageable pageable) {
         return this.repository.findAll(specification, pageable).getContent();
     }
 
     @Override
+    @Transactional
     public List<HotelEntity> findAll(Specification specification) {
         return this.repository.findAll(specification);
     }
 
     @Override
+    public List<HotelEntity> findAll(Specification specification, Sort sort) {
+        return this.repository.findAll(specification, sort);
+    }
+
+    @Override
     public HotelEntity findOne(Specification<HotelEntity> spec) {
         return this.repository.findOne(spec).get();
+    }
+
+    @Override
+    public HotelEntity findOne(Long id) {
+        return this.repository.getOne(id);
     }
 
     @Override

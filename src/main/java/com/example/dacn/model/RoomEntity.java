@@ -1,5 +1,7 @@
 package com.example.dacn.model;
 
+import com.example.dacn.services.RoomService;
+import com.example.dacn.services.impl.RoomServiceImpl;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,8 +20,7 @@ public class RoomEntity extends BaseEntity {
     private String status;
     private Double originPrice;
     private Double rentalPrice;
-    private Boolean isDeals;
-
+    private Double finalPrice;
 
     @ManyToOne
     @JoinColumn(name = "room_type_id")
@@ -53,4 +54,30 @@ public class RoomEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "room")
     private Set<CartEntity> cartItems = new LinkedHashSet<CartEntity>();
+
+    public void setRentalPrice(Double rentalPrice) {
+        this.rentalPrice = rentalPrice;
+        this.updateSellingPrice();
+    }
+
+    public void setDiscount(DiscountEntity discount) {
+        this.discount = discount;
+        this.updateSellingPrice();
+    }
+
+    public RoomEntity(){
+        this.updateSellingPrice();
+    }
+
+    @PostLoad
+    public void updateSellingPrice() {
+        DiscountEntity roomDiscount = this.discount;
+        if(roomDiscount != null){
+        Double truthPercent = 100 - roomDiscount.getDiscountPercent();
+        this.finalPrice = (this.getRentalPrice() * (truthPercent / 100));
+        }else{
+            this.finalPrice = 0.0;
+        }
+    }
+
 }

@@ -19,6 +19,7 @@ public class HotelEntity extends BaseEntity {
     private Double averagePoints;
     private String status;
     private Boolean isFreeCancellation;
+    private Boolean isDeals;
 
     @ManyToOne
     @JoinColumn(name = "username")

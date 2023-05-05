@@ -16,6 +16,6 @@ public class ProvinceService implements IProvinceService {
 
     @Override
     public ProvinceEntity findBy_domain(String domain) {
-        return this.findBy_domain(domain);
+        return this.provinceRepository.findBy_domain(domain);
     }
 }

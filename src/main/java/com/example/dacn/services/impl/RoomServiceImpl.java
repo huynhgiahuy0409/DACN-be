@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class RoomServiceImpl implements RoomService {
 
@@ -35,7 +37,16 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public RoomEntity findOne(Specification<RoomEntity> spec) {
-        return this.repository.findOne(spec).get();
+        if(this.repository.findOne(spec).isPresent()){
+            return this.repository.findOne(spec).get();
+        }else{
+            return null;
+        }
+    }
+
+    @Override
+    public List<RoomEntity> findAll(Specification<RoomEntity> spec) {
+        return this.repository.findAll(spec);
     }
 
     @Override

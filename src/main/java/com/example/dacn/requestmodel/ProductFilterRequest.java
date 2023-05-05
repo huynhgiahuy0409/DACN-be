@@ -15,18 +15,10 @@ public class ProductFilterRequest {
     private Integer adults;
 
     private Integer children;
+
     private Long hotelId;
 
-    @Override
-    public String toString() {
-        return "ProductFilterRequest{" +
-                "search='" + search + '\'' +
-                ", startDate=" + startDate +
-                ", endDate=" + endDate +
-                ", rooms=" + rooms +
-                ", adults=" + adults +
-                ", children=" + children +
-                ", hotelId=" + hotelId +
-                '}';
-    }
+    private ProductSortRequest productSortRequest;
+
+
 }

@@ -18,9 +18,9 @@ public class LocationSpecification implements Specification<WardEntity> {
         String param = this.criteria.getKey();
         Object value = this.criteria.getValue();
         String operator = this.criteria.getOperator();
-//        if (operator.equals("like")) {
-//            Join<WardEntity, DiscountEntity> districtJoin = root.join("");
-//            return criteriaBuilder.like(root.get(param), "%" + value.toString() + "%");
+//        if (operator.equals("room-capacity is gt|et")) {
+//
+//            return criteriaBuilder.greaterThanOrEqualTo();
 //        }
 
         return null;
