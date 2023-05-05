@@ -18,6 +18,8 @@ public class HotelEntity extends BaseEntity {
     private String description;
     private Double averagePoints;
     private String status;
+    private Boolean isFreeCancellation;
+    private Boolean isDeals;
 
     @ManyToOne
     @JoinColumn(name = "username")

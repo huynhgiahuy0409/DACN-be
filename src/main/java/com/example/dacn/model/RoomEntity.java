@@ -1,5 +1,7 @@
 package com.example.dacn.model;
 
+import com.example.dacn.services.RoomService;
+import com.example.dacn.services.impl.RoomServiceImpl;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +20,7 @@ public class RoomEntity extends BaseEntity {
     private String status;
     private Double originPrice;
     private Double rentalPrice;
+    private Double finalPrice;
 
     @ManyToOne
     @JoinColumn(name = "room_type_id")
@@ -42,12 +45,39 @@ public class RoomEntity extends BaseEntity {
     @JoinTable(name = "room_payment_method", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "payment_method"))
     private Set<PaymentMethodEntity> paymentMethods = new LinkedHashSet<PaymentMethodEntity>();
 
-    @OneToMany(mappedBy = "room")
-    private Set<DiscountEntity> discounts = new LinkedHashSet<DiscountEntity>();
+    @ManyToOne
+    @JoinColumn(name = "discount_id")
+    private DiscountEntity discount;
 
     @OneToMany(mappedBy = "room")
     private Set<ReservationEntity> reservations = new LinkedHashSet<ReservationEntity>();
 
     @OneToMany(mappedBy = "room")
     private Set<CartEntity> cartItems = new LinkedHashSet<CartEntity>();
+
+    public void setRentalPrice(Double rentalPrice) {
+        this.rentalPrice = rentalPrice;
+        this.updateSellingPrice();
+    }
+
+    public void setDiscount(DiscountEntity discount) {
+        this.discount = discount;
+        this.updateSellingPrice();
+    }
+
+    public RoomEntity(){
+        this.updateSellingPrice();
+    }
+
+    @PostLoad
+    public void updateSellingPrice() {
+        DiscountEntity roomDiscount = this.discount;
+        if(roomDiscount != null){
+        Double truthPercent = 100 - roomDiscount.getDiscountPercent();
+        this.finalPrice = (this.getRentalPrice() * (truthPercent / 100));
+        }else{
+            this.finalPrice = 0.0;
+        }
+    }
+
 }
