@@ -1,4 +1,4 @@
-package com.example.dacn.model;
+package com.example.dacn.entity;
 
 
 import lombok.*;

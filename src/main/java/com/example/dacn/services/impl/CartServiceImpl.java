@@ -1,17 +1,15 @@
 package com.example.dacn.services.impl;
 
-import com.example.dacn.dto.HotelRoomDto;
 import com.example.dacn.dto.request.CartRequest;
-import com.example.dacn.dto.request.ReservationRequest;
 import com.example.dacn.dto.response.BenefitResponse;
 import com.example.dacn.dto.response.CartResponse;
 import com.example.dacn.dto.response.HotelResponse;
 import com.example.dacn.dto.response.RoomResponse;
 import com.example.dacn.enums.RoomStatus;
-import com.example.dacn.model.CartEntity;
-import com.example.dacn.model.HotelEntity;
-import com.example.dacn.model.HotelImageEntity;
-import com.example.dacn.model.RoomEntity;
+import com.example.dacn.entity.CartEntity;
+import com.example.dacn.entity.HotelEntity;
+import com.example.dacn.entity.HotelImageEntity;
+import com.example.dacn.entity.RoomEntity;
 import com.example.dacn.repository.CartRepository;
 import com.example.dacn.services.CartService;
 import com.example.dacn.services.HotelService;

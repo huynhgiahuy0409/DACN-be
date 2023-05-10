@@ -1,4 +1,4 @@
-package com.example.dacn.model;
+package com.example.dacn.entity;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,10 +8,10 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "ward")
+@Table(name = "district")
 @Getter
 @Setter
-public class WardEntity extends BaseEntity{
+public class DistrictEntity extends BaseEntity{
     private String _name;
     private String _prefix;
 
@@ -19,7 +19,6 @@ public class WardEntity extends BaseEntity{
     @JoinColumn(name = "province_id")
     private ProvinceEntity province;
 
-    @OneToMany(mappedBy = "ward")
+    @OneToMany(mappedBy = "district")
     private Set<AddressEntity> addresses = new LinkedHashSet<AddressEntity>();
-
 }

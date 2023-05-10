@@ -1,8 +1,8 @@
 package com.example.dacn.services.impl;
 
 import com.example.dacn.dto.response.RoomResponse;
-import com.example.dacn.model.DiscountEntity;
-import com.example.dacn.model.RoomEntity;
+import com.example.dacn.entity.DiscountEntity;
+import com.example.dacn.entity.RoomEntity;
 import com.example.dacn.repository.RoomRepository;
 import com.example.dacn.services.RoomService;
 import com.example.dacn.specification.RoomSpecification;

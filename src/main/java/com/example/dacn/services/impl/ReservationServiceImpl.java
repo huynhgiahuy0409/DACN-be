@@ -7,7 +7,7 @@ import com.example.dacn.dto.response.HotelResponse;
 import com.example.dacn.dto.response.ReservationResponse;
 import com.example.dacn.dto.response.RoomResponse;
 import com.example.dacn.enums.ReservationStatus;
-import com.example.dacn.model.*;
+import com.example.dacn.entity.*;
 import com.example.dacn.repository.ReservationRepository;
 import com.example.dacn.services.*;
 import com.example.dacn.specification.ReservationSpecification;

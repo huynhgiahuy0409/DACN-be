@@ -1,6 +1,6 @@
 package com.example.dacn.specification.builder;
 
-import com.example.dacn.model.HotelEntity;
+import com.example.dacn.entity.HotelEntity;
 import com.example.dacn.specification.HotelSpecification;
 import com.example.dacn.specification.criteria.SearchCriteria;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,4 +32,6 @@ public class HotelSpecificationBuilder {
         }
         return result;
     }
+
+
 }

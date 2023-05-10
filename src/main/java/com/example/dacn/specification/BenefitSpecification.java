@@ -1,16 +1,12 @@
 package com.example.dacn.specification;
 
-import com.example.dacn.model.BenefitEntity;
-import com.example.dacn.model.HotelEntity;
-import com.example.dacn.model.RoomEntity;
+import com.example.dacn.entity.BenefitEntity;
+import com.example.dacn.entity.RoomEntity;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import java.util.ArrayList;
-import java.util.List;
 
 public class BenefitSpecification {
     public static Specification<BenefitEntity> distinctBenefitsByHotel(Long hotelId) {

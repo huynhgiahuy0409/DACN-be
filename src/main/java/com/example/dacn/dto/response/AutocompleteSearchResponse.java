@@ -5,9 +5,15 @@ import lombok.Data;
 
 @Data
 public class AutocompleteSearchResponse {
-    private String type; //place or hotel
-    private String category;
     private String name;
-    private Long hotelId;
-    private String searchValue;
+    private String category;
+    private Long value;
+    private String type;
+
+    public AutocompleteSearchResponse(String name, String category, Long value, String type) {
+        this.name = name;
+        this.category = category;
+        this.value = value;
+        this.type = type;
+    }
 }

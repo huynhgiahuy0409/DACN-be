@@ -1,7 +1,5 @@
-package com.example.dacn.model;
+package com.example.dacn.entity;
 
-import com.example.dacn.services.RoomService;
-import com.example.dacn.services.impl.RoomServiceImpl;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -54,16 +52,6 @@ public class RoomEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "room")
     private Set<CartEntity> cartItems = new LinkedHashSet<CartEntity>();
-
-    public void setRentalPrice(Double rentalPrice) {
-        this.rentalPrice = rentalPrice;
-        this.updateSellingPrice();
-    }
-
-    public void setDiscount(DiscountEntity discount) {
-        this.discount = discount;
-        this.updateSellingPrice();
-    }
 
     public RoomEntity(){
         this.updateSellingPrice();

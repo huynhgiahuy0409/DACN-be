@@ -1,8 +1,7 @@
-package com.example.dacn.model;
+package com.example.dacn.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.HashSet;

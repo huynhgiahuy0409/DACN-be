@@ -1,6 +1,6 @@
 package com.example.dacn.services.impl;
 
-import com.example.dacn.model.BenefitEntity;
+import com.example.dacn.entity.BenefitEntity;
 import com.example.dacn.repository.IBenefitRepository;
 import com.example.dacn.services.IBenefitService;
 import org.springframework.beans.factory.annotation.Autowired;

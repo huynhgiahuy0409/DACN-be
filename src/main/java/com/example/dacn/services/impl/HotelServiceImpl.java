@@ -1,6 +1,6 @@
 package com.example.dacn.services.impl;
 
-import com.example.dacn.model.HotelEntity;
+import com.example.dacn.entity.HotelEntity;
 import com.example.dacn.repository.HotelRepository;
 import com.example.dacn.responsemodel.AverageRatingResponse;
 import com.example.dacn.services.HotelService;
@@ -12,11 +12,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class HotelServiceImpl implements HotelService {
@@ -36,6 +33,16 @@ public class HotelServiceImpl implements HotelService {
         HotelEntity h = repository.findById(id).orElseThrow(()-> new Exception("Hotel not found"+id));
 return ResponseEntity.ok(h).getBody();
 
+    }
+
+    @Override
+    public HotelEntity getOne(Long id) {
+        return this.repository.getOne(id);
+    }
+
+    @Override
+    public HotelEntity getOne(Specification<HotelEntity> specification) {
+        return this.repository.findOne(specification).get();
     }
 
     @Override
@@ -130,5 +137,6 @@ return ResponseEntity.ok(h).getBody();
         averageRatingResponse.setName(name);
         return averageRatingResponse;
     }
+
 
 }

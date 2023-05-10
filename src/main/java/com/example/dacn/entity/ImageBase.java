@@ -1,4 +1,4 @@
-package com.example.dacn.model;
+package com.example.dacn.entity;
 
 import lombok.Data;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;

@@ -1,7 +1,7 @@
 package com.example.dacn.dto;
 
-import com.example.dacn.model.HotelEntity;
-import com.example.dacn.model.RoomEntity;
+import com.example.dacn.entity.HotelEntity;
+import com.example.dacn.entity.RoomEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

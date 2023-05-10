@@ -2,10 +2,9 @@ package com.example.dacn.services.impl;
 
 import com.example.dacn.constance.SystemConstance;
 import com.example.dacn.dto.JWTDTO;
-import com.example.dacn.model.JWTEntity;
+import com.example.dacn.entity.JWTEntity;
 import com.example.dacn.repository.IJWTRepository;
 import com.example.dacn.services.IJWTService;
-import com.nimbusds.jwt.JWT;
 import io.jsonwebtoken.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,9 +1,6 @@
-package com.example.dacn.model;
+package com.example.dacn.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

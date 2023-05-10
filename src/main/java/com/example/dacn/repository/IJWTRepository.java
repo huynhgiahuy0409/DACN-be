@@ -1,6 +1,6 @@
 package com.example.dacn.repository;
 
-import com.example.dacn.model.JWTEntity;
+import com.example.dacn.entity.JWTEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 

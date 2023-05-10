@@ -1,7 +1,7 @@
 package com.example.dacn.services;
 
 import com.example.dacn.dto.response.RoomResponse;
-import com.example.dacn.model.RoomEntity;
+import com.example.dacn.entity.RoomEntity;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;

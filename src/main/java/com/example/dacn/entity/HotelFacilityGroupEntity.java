@@ -1,4 +1,4 @@
-package com.example.dacn.model;
+package com.example.dacn.entity;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,11 +14,11 @@ import java.util.Set;
 @Table(name = "room_facility_group")
 @Getter
 @Setter
-public class RoomFacilityGroupEntity{
+public class HotelFacilityGroupEntity {
     @Id
     private String code;
     private String name;
 
-    @OneToMany(mappedBy = "roomFacilityGroup")
+    @OneToMany(mappedBy = "hotelFacilityGroup")
     private Set<FacilityEntity> facilities = new LinkedHashSet<FacilityEntity>();
 }

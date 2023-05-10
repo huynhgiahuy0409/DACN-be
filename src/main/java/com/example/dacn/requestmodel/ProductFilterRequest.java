@@ -16,7 +16,9 @@ public class ProductFilterRequest {
 
     private Integer children;
 
-    private Long hotelId;
+    private Long value;
+
+    private String type;
 
     private ProductSortRequest productSortRequest;
 

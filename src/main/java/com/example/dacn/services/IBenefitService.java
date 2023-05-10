@@ -1,6 +1,6 @@
 package com.example.dacn.services;
 
-import com.example.dacn.model.BenefitEntity;
+import com.example.dacn.entity.BenefitEntity;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;

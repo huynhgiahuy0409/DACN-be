@@ -1,12 +1,12 @@
 package com.example.dacn.specification;
 
-import com.example.dacn.model.*;
+import com.example.dacn.entity.*;
 import com.example.dacn.specification.criteria.SearchCriteria;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
-import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class HotelSpecification implements Specification<HotelEntity> {
@@ -43,12 +43,37 @@ public class HotelSpecification implements Specification<HotelEntity> {
             if (property.equals("price")) {
                 Join<HotelEntity, RoomEntity> hotelRoomJoin = root.join("rooms");
                 orders.add(criteriaBuilder.asc(hotelRoomJoin.get("rentalPrice")));
-            }else if(property.equals("product-name")){
+            } else if (property.equals("product-name")) {
                 System.out.println(property);
                 orders.add(criteriaBuilder.desc(root.get("name")));
             }
             query.orderBy(orders);
             return criteriaBuilder.conjunction();
+        };
+    }
+
+    public static Specification<HotelEntity> findByProvince(Long provinceId) {
+        return (root, query, criteriaBuilder) -> {
+            Join<HotelEntity, AddressEntity> hotelAddressJoin = root.join("address");
+            Join<AddressEntity, ProvinceEntity> addressProvinceJoin = hotelAddressJoin.join("province");
+            return criteriaBuilder.equal(addressProvinceJoin.get("id"), provinceId.toString());
+        };
+    }
+
+    public static Specification<HotelEntity> findValidSearchedHotel(Long hotelId, Integer maxAdult, Integer maxChildren) {
+        return (root, query, criteriaBuilder) -> {
+            Join<HotelEntity, RoomEntity> roomJoin = root.join("rooms");
+            query.where(root.get("id").in(hotelId), criteriaBuilder.equal(roomJoin.get("maxAdults"), maxAdult), criteriaBuilder.equal(roomJoin.get("maxChildren"), maxChildren));
+            return query.getRestriction();
+        };
+    }
+    public static Specification<HotelEntity> findValidSearchedHotel(Collection<Long> hotelIds, Integer maxAdult, Integer maxChildren) {
+        return (root, query, criteriaBuilder) -> {
+                Join<HotelEntity, RoomEntity> roomJoin = root.join("rooms");
+                query.multiselect(root, criteriaBuilder.min(roomJoin.get("rentalPrice")))
+                        .where(root.get("id").in(hotelIds), criteriaBuilder.greaterThanOrEqualTo(roomJoin.get("maxAdults"), maxAdult), criteriaBuilder.equal(roomJoin.get("maxChildren"), maxChildren))
+                        .groupBy(root.get("id"));
+                return query.getRestriction();
         };
     }
 }

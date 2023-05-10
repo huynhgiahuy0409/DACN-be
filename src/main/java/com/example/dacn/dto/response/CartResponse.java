@@ -1,7 +1,6 @@
 package com.example.dacn.dto.response;
 
 import com.example.dacn.enums.RoomStatus;
-import com.example.dacn.model.BenefitEntity;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;

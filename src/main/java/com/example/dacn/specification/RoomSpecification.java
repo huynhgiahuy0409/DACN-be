@@ -1,6 +1,6 @@
 package com.example.dacn.specification;
 
-import com.example.dacn.model.RoomEntity;
+import com.example.dacn.entity.RoomEntity;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Predicate;
@@ -49,16 +49,16 @@ public class RoomSpecification {
             subquery.where(
                     criteriaBuilder.and(
                             criteriaBuilder.equal(subRoot.get("hotel").get("id"), hotelId),
-                            criteriaBuilder.greaterThanOrEqualTo(subRoot.get("maxAdults"), maxAdult),
-                            criteriaBuilder.greaterThanOrEqualTo(subRoot.get("maxChildren"), maxChildren)
+                            criteriaBuilder.equal(subRoot.get("maxAdults"), maxAdult),
+                            criteriaBuilder.equal(subRoot.get("maxChildren"), maxChildren)
                     )
             );
             // Lọc ra danh sách các phòng còn lại trong cùng khách sạn với giá nhỏ hơn hoặc bằng giá của phòng tìm được và cũng thoả maxAdult
             return criteriaBuilder.and(
                     criteriaBuilder.equal(root.get("hotel").get("id"), hotelId),
                     criteriaBuilder.lessThanOrEqualTo(root.get("rentalPrice"), criteriaBuilder.<BigDecimal>coalesce(subquery, root.get("rentalPrice"))),
-                    criteriaBuilder.greaterThanOrEqualTo(root.get("maxAdults"), maxAdult),
-                    criteriaBuilder.greaterThanOrEqualTo(root.get("maxChildren"), maxChildren)
+                    criteriaBuilder.equal(root.get("maxAdults"), maxAdult),
+                    criteriaBuilder.equal(root.get("maxChildren"), maxChildren)
             );
         };
     }

@@ -1,7 +1,6 @@
 package com.example.dacn.specification;
 
-import com.example.dacn.model.DiscountEntity;
-import com.example.dacn.model.WardEntity;
+import com.example.dacn.entity.WardEntity;
 import com.example.dacn.specification.criteria.SearchCriteria;
 import org.springframework.data.jpa.domain.Specification;
 
