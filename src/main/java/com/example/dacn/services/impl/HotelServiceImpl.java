@@ -26,8 +26,8 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     public HotelEntity getHotel(Long id) throws Exception {
-        HotelEntity h = repository.findById(id).orElseThrow(()-> new Exception("Hotel not found"+id));
-return ResponseEntity.ok(h).getBody();
+        HotelEntity h = repository.findById(id).orElseThrow(() -> new Exception("Hotel not found" + id));
+        return ResponseEntity.ok(h).getBody();
 
     }
 
@@ -43,7 +43,7 @@ return ResponseEntity.ok(h).getBody();
 
     @Override
     public ResponseEntity<HotelEntity> updateHotel(Long id, HotelEntity hotel) throws Exception {
-        HotelEntity h = repository.findById(id).orElseThrow(()-> new Exception("Hotel not found"+id));
+        HotelEntity h = repository.findById(id).orElseThrow(() -> new Exception("Hotel not found" + id));
         h.setHotelImages(hotel.getHotelImages());
         h.setName(hotel.getName());
         h.setAddress(hotel.getAddress());
@@ -62,9 +62,9 @@ return ResponseEntity.ok(h).getBody();
     }
 
     @Override
-    public ResponseEntity<Map<String,Boolean>> deleteHotel(Long id) throws Exception {
-        HotelEntity h = repository.findById(id).orElseThrow(()-> new Exception("Hotel not found"+id));
-            repository.delete(h);
+    public ResponseEntity<Map<String, Boolean>> deleteHotel(Long id) throws Exception {
+        HotelEntity h = repository.findById(id).orElseThrow(() -> new Exception("Hotel not found" + id));
+        repository.delete(h);
         Map<String, Boolean> re = new HashMap<>();
         re.put("deleted", Boolean.TRUE);
         return ResponseEntity.ok(re);
