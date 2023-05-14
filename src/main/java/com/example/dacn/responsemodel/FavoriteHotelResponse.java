@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FavoriteHotelResponse {
     private Long id;
+    private Long hotelId;
     private String bannerUrl;
     private String name;
     private String address;

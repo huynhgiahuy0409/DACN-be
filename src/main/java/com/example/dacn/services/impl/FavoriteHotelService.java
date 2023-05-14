@@ -34,7 +34,8 @@ public class FavoriteHotelService implements IFavoriteHotelService {
     public List<FavoriteHotelResponse> findAllByUsername(String username) {
         return favoriteHotelRepository.findAllByUserUsername(username).stream().map(
                 i -> FavoriteHotelResponse.builder()
-                        .id(i.getHotel().getId())
+                        .id(i.getId())
+                        .hotelId(i.getHotel().getId())
                         .name(i.getHotel().getName())
                         .bannerUrl(imageService.findFirstBannerImage(i.getHotel().getId()))
                         .address(i.getHotel().getAddress().getWard().get_name() + " ," + i.getHotel().getAddress().getProvince().get_name())
