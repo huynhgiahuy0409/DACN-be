@@ -11,14 +11,12 @@ import com.example.dacn.entity.HotelEntity;
 import com.example.dacn.entity.HotelImageEntity;
 import com.example.dacn.entity.RoomEntity;
 import com.example.dacn.repository.CartRepository;
-import com.example.dacn.services.CartService;
-import com.example.dacn.services.HotelService;
-import com.example.dacn.services.ReservationService;
-import com.example.dacn.services.RoomService;
+import com.example.dacn.services.*;
 import com.example.dacn.specification.CartSpecification;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -38,6 +36,8 @@ public class CartServiceImpl implements CartService {
     private RoomService roomService;
     @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private IHotelImageService imageService;
     @Autowired
     private ModelMapper mapper;
 
@@ -90,7 +90,22 @@ public class CartServiceImpl implements CartService {
                 .sessionId(cart.getSessionId())
                 .build();
         CartEntity addedCartItem = repository.save(cartEntity);
-        return mapper.map(addedCartItem, CartResponse.class);
+        return CartResponse.builder()
+                .id(addedCartItem.getId())
+                .adult(addedCartItem.getAdult())
+                .child(addedCartItem.getChild())
+                .fromDate(addedCartItem.getFromDate())
+                .toDate(addedCartItem.getToDate())
+                .hotel(mapper.map(addedCartItem.getHotel(), HotelResponse.class))
+                .room(mapper.map(addedCartItem.getRoom(), RoomResponse.class))
+                .sessionId(addedCartItem.getSessionId())
+                .address(addedCartItem.getHotel().getAddress().getWard().get_name() + " ," + addedCartItem.getHotel().getAddress().getProvince().get_name())
+                .bannerImage(imageService.findFirstBannerImage(addedCartItem.getHotel().getId()))
+                .totalReviews(addedCartItem.getHotel().getRatings().size())
+                .roomType(addedCartItem.getRoom().getRoomType().getName())
+                .benefits(addedCartItem.getRoom().getBenefits().stream().map(i -> mapper.map(i, BenefitResponse.class)).collect(Collectors.toSet()))
+                .status(isReservedBefore(addedCartItem.getHotel(), addedCartItem.getRoom(), addedCartItem.getFromDate(), addedCartItem.getToDate()))
+                .build();
     }
 
     @Override

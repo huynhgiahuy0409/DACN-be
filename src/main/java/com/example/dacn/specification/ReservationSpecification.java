@@ -1,6 +1,7 @@
 package com.example.dacn.specification;
 
 import com.example.dacn.entity.ReservationEntity;
+import com.example.dacn.enums.ReservationStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Predicate;
@@ -16,11 +17,12 @@ public class ReservationSpecification {
             predicates.add(cb.equal(root.get("room").get("id"), roomId));
             predicates.add(
                     cb.or(
-                            cb.or(cb.greaterThanOrEqualTo(root.get("startDate"), startDate)),
-                            cb.or(cb.greaterThanOrEqualTo(root.get("endDate"), startDate)),
-                            cb.or(cb.greaterThanOrEqualTo(root.get("endDate"), endDate)),
-                            cb.or(cb.greaterThanOrEqualTo(root.get("startDate"), endDate))
+                            cb.greaterThanOrEqualTo(root.get("startDate"), startDate),
+                            cb.greaterThanOrEqualTo(root.get("endDate"), startDate),
+                            cb.greaterThanOrEqualTo(root.get("endDate"), endDate),
+                            cb.greaterThanOrEqualTo(root.get("startDate"), endDate)
                     ));
+            predicates.add(cb.between(root.get("status"), ReservationStatus.PENDING, ReservationStatus.ACCEPTED));
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
