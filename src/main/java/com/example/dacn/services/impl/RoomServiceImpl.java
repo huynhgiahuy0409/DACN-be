@@ -37,9 +37,9 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public RoomEntity findOne(Specification<RoomEntity> spec) {
-        if(this.repository.findOne(spec).isPresent()){
+        if (this.repository.findOne(spec).isPresent()) {
             return this.repository.findOne(spec).get();
-        }else{
+        } else {
             return null;
         }
     }
@@ -56,5 +56,10 @@ public class RoomServiceImpl implements RoomService {
         Double truthPercent = 100 - roomDiscount.getDiscountPercent();
         finalPrice += (room.getRentalPrice() * (truthPercent / 100));
         return finalPrice;
+    }
+
+    @Override
+    public RoomEntity findMinimumPriceRoom(Long hotelId) {
+        return repository.findFirstByHotelIdOrderByFinalPriceAsc(hotelId);
     }
 }

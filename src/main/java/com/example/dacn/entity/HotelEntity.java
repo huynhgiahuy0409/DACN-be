@@ -46,4 +46,7 @@ public class HotelEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "hotel")
     private Set<UserRating> ratings = new LinkedHashSet<UserRating>();
+
+    @OneToMany(mappedBy = "hotel")
+    private Set<FavoriteHotelEntity> favoriteHotels = new LinkedHashSet<>();
 }

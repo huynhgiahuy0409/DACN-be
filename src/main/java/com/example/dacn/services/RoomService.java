@@ -17,5 +17,5 @@ public interface RoomService {
 
     Double computeFinalPrice(RoomEntity room);
 
-
+    RoomEntity findMinimumPriceRoom(Long hotelId);
 }
