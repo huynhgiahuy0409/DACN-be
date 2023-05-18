@@ -63,7 +63,7 @@ public class FavoriteHotelService implements IFavoriteHotelService {
         FavoriteHotelEntity savedFavoriteHotel = favoriteHotelRepository.save(favoriteHotel);
 
         return FavoriteHotelResponse.builder()
-                .id(savedFavoriteHotel.getHotel().getId())
+                .id(hotel.getId())
                 .name(savedFavoriteHotel.getHotel().getName())
                 .bannerUrl(imageService.findFirstBannerImage(savedFavoriteHotel.getHotel().getId()))
                 .address(savedFavoriteHotel.getHotel().getAddress().getWard().get_name() + " ," + savedFavoriteHotel.getHotel().getAddress().getProvince().get_name())
