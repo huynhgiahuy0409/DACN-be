@@ -15,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class ReservationServiceImpl implements ReservationService {
     @Autowired
     private ReservationRepository repository;
@@ -136,15 +138,14 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    @Transactional
     public List<ReservationResponse> saveAll(List<ReservationRequest> request) {
         try {
-            List<ReservationResponse> responseList = new ArrayList<>();
-            for (ReservationRequest req : request) {
-                HotelRoomDto dto = checkReservedBefore(req);
-                if (dto != null) {
-                    responseList.add(saveWithoutSendMail(req, dto.getHotel(), dto.getRoom()));
-                }
-            }
+            List<ReservationResponse> responseList;
+            List<ReservationEntity> upcomingList = getUpcomingSaveReservationList(request);
+            if (upcomingList.size() < 1) throw new Exception("No reservation is valid !");
+            List<ReservationEntity> savedList = repository.saveAll(upcomingList);
+            responseList = savedList.stream().map(this::getReservationResponse).collect(Collectors.toList());
             emailService.sendReservationAllMail(request.get(0).getFullName(), request.get(0).getEmail());
             return responseList;
         } catch (Exception e) {
@@ -185,7 +186,58 @@ public class ReservationServiceImpl implements ReservationService {
         }
     }
 
-    public ReservationResponse saveWithoutSendMail(ReservationRequest request, HotelEntity hotel, RoomEntity room) {
+    public List<ReservationEntity> getUpcomingSaveReservationList(List<ReservationRequest> requestList) {
+        List<ReservationEntity> re = new ArrayList<>();
+
+        for (ReservationRequest request : requestList) {
+            HotelEntity hotel = null;
+            try {
+                hotel = hotelService.findById(request.getHotelId());
+            } catch (Exception ignored) {
+            }
+            RoomEntity room = roomService.findByHotelAndRoomId(request.getHotelId(), request.getRoomId());
+
+            List<Long> reservedList = findReservationBefore(request.getHotelId(), request.getRoomId(), request.getStartDate(), request.getEndDate());
+
+            UserEntity existedUser = userService.findByUsernameOrEmail(request.getUsername(), request.getEmail());
+
+            if (null == existedUser) {
+                GuestDTO guest = GuestDTO.builder()
+                        .username(UUID.randomUUID().toString())
+                        .password(UUID.randomUUID().toString())
+                        .fullName(request.getFullName())
+                        .email(request.getEmail())
+                        .phone(request.getPhone())
+                        .build();
+                existedUser = userService.saveGuest(guest);
+            }
+            if (null != hotel && null != room && request.getAdult() <= room.getMaxAdults()
+                    && request.getChildren() <= room.getMaxChildren() && reservedList.size() == 0) {
+                ReservationEntity reservation = ReservationEntity.builder()
+                        .adult(request.getAdult())
+                        .discountPercent(request.getDiscountPercent())
+                        .price(request.getPrice())
+                        .children(request.getChildren())
+                        .endDate(request.getEndDate())
+                        .startDate(request.getStartDate())
+                        .hotel(hotel)
+                        .room(room)
+                        .user(existedUser)
+                        .status(ReservationStatus.PENDING)
+                        .build();
+                re.add(reservation);
+            }
+        }
+        return re;
+    }
+
+    public ReservationResponse saveWithoutSendMail(ReservationRequest request) throws Exception {
+        HotelEntity hotel = hotelService.findById(request.getHotelId());
+        RoomEntity room = roomService.findByHotelAndRoomId(request.getHotelId(), request.getRoomId());
+        if (null == hotel || null == room) throw new Exception("Đặt phòng thất bại do phòng không tồn tại !");
+        if (request.getAdult() > room.getMaxAdults() || request.getChildren() > room.getMaxChildren())
+            throw new Exception("Số lượng người vượt quá ngưỡng cho phép");
+
         UserEntity existedUser = userService.findByUsernameOrEmail(request.getUsername(), request.getEmail());
         if (null == existedUser) {
             GuestDTO guest = GuestDTO.builder()

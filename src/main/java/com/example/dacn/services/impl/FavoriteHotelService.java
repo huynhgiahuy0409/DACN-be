@@ -67,7 +67,6 @@ public class FavoriteHotelService implements IFavoriteHotelService {
                     .totalRating(existedItem.getHotel().getRatings().size())
                     .build();
         }
-//            throw new Exception("Khách sạn này đã có trong danh sách yêu thích");
         FavoriteHotelEntity favoriteHotel = FavoriteHotelEntity.builder()
                 .hotel(hotel)
                 .user(user)
@@ -76,7 +75,8 @@ public class FavoriteHotelService implements IFavoriteHotelService {
         FavoriteHotelEntity savedFavoriteHotel = favoriteHotelRepository.save(favoriteHotel);
 
         return FavoriteHotelResponse.builder()
-                .id(hotel.getId())
+                .id(savedFavoriteHotel.getId())
+                .hotelId(savedFavoriteHotel.getHotel().getId())
                 .name(savedFavoriteHotel.getHotel().getName())
                 .bannerUrl(imageService.findFirstBannerImage(savedFavoriteHotel.getHotel().getId()))
                 .address(savedFavoriteHotel.getHotel().getAddress().getWard().get_name() + " ," + savedFavoriteHotel.getHotel().getAddress().getProvince().get_domain())
