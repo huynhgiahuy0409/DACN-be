@@ -53,8 +53,21 @@ public class FavoriteHotelService implements IFavoriteHotelService {
         if (hotel == null) throw new Exception("Không tìm thấy khách sạn tương ứng !");
         UserEntity user = userService.findByUsername(request.getUsername());
         if (user == null) throw new Exception("Không tìm thấy người dùng tương ứng !");
-        if (favoriteHotelRepository.findFirstByUserUsernameAndHotelId(request.getUsername(), request.getHotelId()) != null)
-            throw new Exception("Khách sạn này đã có trong danh sách yêu thích");
+        FavoriteHotelEntity existedItem = favoriteHotelRepository.findFirstByUserUsernameAndHotelId(request.getUsername(), request.getHotelId());
+        if (existedItem != null) {
+            favoriteHotelRepository.delete(existedItem);
+            return FavoriteHotelResponse.builder()
+                    .id(hotel.getId())
+                    .name(existedItem.getHotel().getName())
+                    .bannerUrl(imageService.findFirstBannerImage(existedItem.getHotel().getId()))
+                    .address(existedItem.getHotel().getAddress().getWard().get_name() + " ," + existedItem.getHotel().getAddress().getProvince().get_name())
+                    .originPrice(roomService.findMinimumPriceRoom(existedItem.getHotel().getId()).getOriginPrice())
+                    .finalPrice(roomService.findMinimumPriceRoom(existedItem.getHotel().getId()).getFinalPrice())
+                    .avgRating(existedItem.getHotel().getAveragePoints())
+                    .totalRating(existedItem.getHotel().getRatings().size())
+                    .build();
+        }
+//            throw new Exception("Khách sạn này đã có trong danh sách yêu thích");
         FavoriteHotelEntity favoriteHotel = FavoriteHotelEntity.builder()
                 .hotel(hotel)
                 .user(user)
@@ -66,7 +79,7 @@ public class FavoriteHotelService implements IFavoriteHotelService {
                 .id(hotel.getId())
                 .name(savedFavoriteHotel.getHotel().getName())
                 .bannerUrl(imageService.findFirstBannerImage(savedFavoriteHotel.getHotel().getId()))
-                .address(savedFavoriteHotel.getHotel().getAddress().getWard().get_name() + " ," + savedFavoriteHotel.getHotel().getAddress().getProvince().get_name())
+                .address(savedFavoriteHotel.getHotel().getAddress().getWard().get_name() + " ," + savedFavoriteHotel.getHotel().getAddress().getProvince().get_domain())
                 .originPrice(roomService.findMinimumPriceRoom(savedFavoriteHotel.getHotel().getId()).getOriginPrice())
                 .finalPrice(roomService.findMinimumPriceRoom(savedFavoriteHotel.getHotel().getId()).getFinalPrice())
                 .avgRating(savedFavoriteHotel.getHotel().getAveragePoints())
