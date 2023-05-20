@@ -1,6 +1,11 @@
 package com.example.dacn.services;
 
 import com.example.dacn.entity.HotelEntity;
+import com.example.dacn.model.ValidSearchedProduct;
+import com.example.dacn.requestmodel.ProductFilterRequest;
+import com.example.dacn.responsemodel.FilterOptionItemResponse;
+import com.example.dacn.responsemodel.SearchedProductItemResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -34,14 +39,11 @@ public interface HotelService {
 
     List<HotelEntity> findAll(Specification specification, Sort sort);
 
-
-    HotelEntity findOne(Specification<HotelEntity> spec);
-
-    HotelEntity findOne(Long id);
-
     Double computeStarRating(Double hotelPoints);
 
     AverageRatingResponse getAverageRatingResponse(HotelEntity hotel);
 
+    ValidSearchedProduct findSearchedProductItem(ProductFilterRequest productFilterRequest);
 
+    List<Object> findRelativeProductItem(ProductFilterRequest productFilterRequest);
 }

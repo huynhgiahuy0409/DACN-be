@@ -36,4 +36,13 @@ public class SearchedProductItemResponse {
         this.isOnlinePayment = isOnlinePayment;
         this.isFreeCancellation = isFreeCancellation;
     }
+
+    public SearchedProductItemResponse(String name, Double originalPrice, Double rentalPrice, Double finalPrice, Boolean isDeals, Boolean isFreeCancellation) {
+        this.name = name;
+        this.originalPrice = originalPrice;
+        this.rentalPrice = rentalPrice;
+        this.finalPrice = finalPrice;
+        this.isDeals = isDeals;
+        this.isFreeCancellation = isFreeCancellation;
+    }
 }

@@ -2,8 +2,12 @@ package com.example.dacn.controller;
 
 import com.example.dacn.entity.HotelEntity;
 import com.example.dacn.model.SearchedProductSorter;
+import com.example.dacn.repository.HotelRepository;
+import com.example.dacn.requestmodel.OptionFilterRequest;
+import com.example.dacn.requestmodel.ProductSortRequest;
 import com.example.dacn.responsemodel.*;
 import com.example.dacn.services.*;
+import com.example.dacn.services.impl.HotelServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -69,8 +73,7 @@ public class HotelController {
 
     @PostMapping("/search")
     public ResponseEntity searchHotel(@RequestBody(required = true) ProductFilterRequest productFilterRequest) {
-        SearchedProductSorter sorter = productFilterRequest.getProductSortRequest() != null ? new SearchedProductSorter(productFilterRequest.getProductSortRequest().getProperty(), productFilterRequest.getProductSortRequest().getDirection()) : null;
-        SearchedProductResponse data = this.searchedProductService.getSearchedProductFromAutocomplete(productFilterRequest.getValue(), productFilterRequest.getType(), productFilterRequest.getAdults(), productFilterRequest.getChildren(), sorter);
+        SearchedProductResponse data = searchedProductService.getSearchedProductFromAutocomplete(productFilterRequest);
         APIResponse<SearchedProductResponse> response = new APIResponse<>(data, HttpStatus.OK.getReasonPhrase(), HttpStatus.OK.value());
         return ResponseEntity.ok(response);
     }

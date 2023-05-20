@@ -14,8 +14,7 @@ import java.util.Set;
 @Table(name = "room_facility_group")
 @Getter
 @Setter
-public class RoomFacilityGroupEntity{
-    @Id
+public class RoomFacilityGroupEntity extends BaseEntity{
     private String code;
     private String name;
 

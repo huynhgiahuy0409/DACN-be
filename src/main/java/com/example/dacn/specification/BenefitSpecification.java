@@ -23,4 +23,19 @@ public class BenefitSpecification {
             return cb.in(roomJoin).value(roomSubquery);
         };
     }
+//    public static Specification<FilterOptionResponse> getBenefitStatisticsSpecification() {
+//        return (root, query, cb) -> {
+//            Subquery<Long> subquery = query.subquery(Long.class);
+//            Root<RoomEntity> subqueryRoot = subquery.from(RoomEntity.class);
+//            Join<RoomEntity, BenefitEntity> roomBenefitJoin = subqueryRoot.join("benefits");
+//            subquery.select(cb.count(roomBenefitJoin.get("hotel").get("id")))
+//                    .where(cb.equal(roomBenefitJoin.get("maxAdults"), 2));
+//            subquery.groupBy(roomBenefitJoin.get("id"));
+//            query.multiselect(roomBenefitJoin.get("name"),
+//                    roomBenefitJoin.get("id"),
+//                    cb.coalesce(subquery.getSelection(), 0L).alias("countHotel"));
+//            return cb.conjunction();
+//        };
+//    }
+
 }

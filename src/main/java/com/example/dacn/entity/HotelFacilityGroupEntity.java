@@ -11,11 +11,11 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "room_facility_group")
+@Table(name = "hotel_facility_group")
 @Getter
 @Setter
-public class HotelFacilityGroupEntity {
-    @Id
+public class HotelFacilityGroupEntity extends BaseEntity{
+
     private String code;
     private String name;
 
