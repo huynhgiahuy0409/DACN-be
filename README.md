@@ -1,19 +1,24 @@
 # DACN-be
 
-# Test session id for cart : 
+# Test session id for cart :
+
 b45cffe084dd3d20d928bee85e7b0f21
+
 # Test Paypal account :
 
 <table>
 <tr>
-<td>sb-k35vh23838705@personal.example.com</td>
+<th>username</th>
+<th>password</th>
 </tr>
 <tr>
+<td>sb-k35vh23838705@personal.example.com</td>
 <td>M8Xb=&"3</td>
 </tr>
 </table>
 
 # Cart test cases
+
 <table>
 <tr>
 <th>id</th>
