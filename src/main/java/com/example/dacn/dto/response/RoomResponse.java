@@ -11,4 +11,5 @@ public class RoomResponse {
     private String status;
     private Double originPrice;
     private Double rentalPrice;
+    private Double finalPrice;
 }
