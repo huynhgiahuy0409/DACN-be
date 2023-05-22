@@ -20,7 +20,8 @@ public class ProductFilterRequest {
 
     private String type;
 
-    private ProductSortRequest productSortRequest;
+    private ProductSortRequest productSort;
 
+    private OptionFilterRequest optionFilter;
 
 }

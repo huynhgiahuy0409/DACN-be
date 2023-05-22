@@ -17,11 +17,11 @@ public class FacilityEntity extends BaseEntity{
     private String icon;
 
     @ManyToOne
-    @JoinColumn(name = "hotel_facility_group_code")
+    @JoinColumn(name = "hotel_facility_group_id")
     private HotelFacilityGroupEntity hotelFacilityGroup;
 
     @ManyToOne
-    @JoinColumn(name = "room_facility_group_code")
+    @JoinColumn(name = "room_facility_group_id")
     private RoomFacilityGroupEntity roomFacilityGroup;
 
     @ManyToMany(mappedBy = "facilities")

@@ -11,11 +11,8 @@ public class SearchedProductResponse {
 
     private List<SearchedProductItemResponse> relativeSearchedProducts;
 
-    @Override
-    public String toString() {
-        return "SearchedProductResponse{" +
-                "searchedProduct=" + searchedProduct +
-                ", relativeSearchedProducts=" + relativeSearchedProducts +
-                '}';
-    }
+    private Double minFinalPrice;
+
+    private Double maxFinalPrice;
+
 }

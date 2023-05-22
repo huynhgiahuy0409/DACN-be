@@ -57,7 +57,18 @@ public class RoomEntity extends BaseEntity {
         this.updateSellingPrice();
     }
 
+    public Double getFinalPrice() {
+        this.updateSellingPrice();
+        System.out.println(this.finalPrice);
+        return this.finalPrice;
+    }
+
+    public void setFinalPrice(Double finalPrice) {
+        this.finalPrice = finalPrice;
+    }
+
     @PostLoad
+    @PostUpdate
     public void updateSellingPrice() {
         DiscountEntity roomDiscount = this.discount;
         if(roomDiscount != null){
