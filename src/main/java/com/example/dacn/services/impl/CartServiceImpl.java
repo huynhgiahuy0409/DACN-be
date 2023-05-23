@@ -17,6 +17,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
@@ -53,7 +54,7 @@ public class CartServiceImpl implements CartService {
                         .room(mapper.map(i.getRoom(), RoomResponse.class))
                         .sessionId(i.getSessionId())
                         .address(i.getHotel().getAddress().getProvince().get_name())
-                        .bannerImage(findFirstThumbnail(i.getHotel().getHotelImages()))
+                        .bannerImage(imageService.findFirstBannerImage(i.getHotel().getId()))
                         .totalReviews(i.getHotel().getRatings().size())
                         .roomType(i.getRoom().getRoomType().getName())
                         .benefits(i.getRoom().getBenefits().stream().map(item -> mapper.map(item, BenefitResponse.class)).collect(Collectors.toSet()))
@@ -115,14 +116,6 @@ public class CartServiceImpl implements CartService {
     @Transactional // delete by each id in list
     public void deleteByIds(List<Long> ids) throws Exception {
         repository.deleteByIdIn(ids);
-    }
-
-    private String findFirstThumbnail(Set<HotelImageEntity> images) {
-        Optional<HotelImageEntity> image = images.stream()
-                .filter(item -> item.getIsThumbnail().equals(true))
-                .findFirst();
-        if (!image.isPresent()) return "";
-        return image.get().getUrl();
     }
 
     private RoomStatus isReservedBefore(HotelEntity hotel, RoomEntity room, LocalDate startDate, LocalDate endDate) {
