@@ -137,10 +137,29 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     public ValidSearchedProduct findSearchedProductItem(ProductFilterRequest productFilterRequest) {
-        Pageable p = PageRequest.of(0, 1);
-        ProductSortRequest sortRequest = productFilterRequest.getProductSort();
-        Page<ValidSearchedProduct> page = this.repository.findValidSearchedProduct(productFilterRequest.getOptionFilter().getPriceFrom(), productFilterRequest.getOptionFilter().getPriceTo(), productFilterRequest.getValue(), productFilterRequest.getAdults(), productFilterRequest.getChildren(), p);
-        return page.isEmpty() ? null : page.getContent().get(0);
+        List<Long> hotelFacilities = Arrays.asList();
+        List<Long> benefits = Arrays.asList();
+        Integer checkHotelFacilityIds = 0;
+        Integer checkBenefits = 0;
+        OptionFilterRequest optionFilterRequest = productFilterRequest.getOptionFilter();
+        if (optionFilterRequest != null && optionFilterRequest.getHotelFacilities() != null && optionFilterRequest.getHotelFacilities().size() > 0) {
+            hotelFacilities = optionFilterRequest.getHotelFacilities();
+            checkHotelFacilityIds = optionFilterRequest.getHotelFacilities().size();
+        }
+        if (optionFilterRequest != null && optionFilterRequest.getBenefits() != null && optionFilterRequest.getBenefits().size() > 0) {
+            benefits = optionFilterRequest.getBenefits();
+            checkBenefits = optionFilterRequest.getBenefits().size();
+        }
+        System.out.println("valid hotel " + productFilterRequest.getValue());
+        Object result = this.repository.findValidSearchedProduct(productFilterRequest.getValue(), productFilterRequest.getOptionFilter().getGuestRating(), productFilterRequest.getOptionFilter().getDiscount(), checkHotelFacilityIds, hotelFacilities, checkBenefits, benefits, productFilterRequest.getOptionFilter().getPriceFrom(), productFilterRequest.getOptionFilter().getPriceTo(), productFilterRequest.getAdults(), productFilterRequest.getChildren());
+        if (result != null) {
+            Object[] responses = Arrays.stream((Object[]) result).map(o -> {
+                return o.toString();
+            }).toArray(Object[]::new);
+            return new ValidSearchedProduct(Long.parseLong(responses[0].toString()), Long.parseLong(responses[1].toString()));
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -153,10 +172,10 @@ public class HotelServiceImpl implements HotelService {
         String dir;
         String orderBy;
         ProductSortRequest productSort = productFilterRequest.getProductSort();
-        if(productSort != null){
+        if (productSort != null) {
             dir = productFilterRequest.getProductSort().getDirection();
             orderBy = productSort.getProperty();
-        }else{
+        } else {
             dir = "desc";
             orderBy = "";
         }
@@ -165,15 +184,15 @@ public class HotelServiceImpl implements HotelService {
         Integer checkHotelFacilityIds = 0;
         Integer checkBenefits = 0;
         OptionFilterRequest optionFilterRequest = productFilterRequest.getOptionFilter();
-        if(optionFilterRequest != null && optionFilterRequest.getHotelFacilities() != null && optionFilterRequest.getHotelFacilities().size() > 0){
-            benefits = optionFilterRequest.getHotelFacilities();
+        if (optionFilterRequest != null && optionFilterRequest.getHotelFacilities() != null && optionFilterRequest.getHotelFacilities().size() > 0) {
+            hotelFacilities = optionFilterRequest.getHotelFacilities();
             checkHotelFacilityIds = optionFilterRequest.getHotelFacilities().size();
         }
-        if(optionFilterRequest != null && optionFilterRequest.getBenefits() != null && optionFilterRequest.getBenefits().size() > 0){
+        if (optionFilterRequest != null && optionFilterRequest.getBenefits() != null && optionFilterRequest.getBenefits().size() > 0) {
             benefits = optionFilterRequest.getBenefits();
             checkBenefits = optionFilterRequest.getBenefits().size();
         }
-        result = this.repository.findValidRelativeSearchedProduct(productFilterRequest.getOptionFilter().getGuestRating(), productFilterRequest.getOptionFilter().getDiscount(),null, hotelFacilities, checkBenefits, benefits , productFilterRequest.getOptionFilter().getPriceFrom(), productFilterRequest.getOptionFilter().getPriceTo(), province.getId(), productFilterRequest.getAdults(), productFilterRequest.getChildren(), orderBy, dir , p);
+        result = this.repository.findValidRelativeSearchedProduct(productFilterRequest.getOptionFilter().getGuestRating(), productFilterRequest.getOptionFilter().getDiscount(), checkHotelFacilityIds, hotelFacilities, checkBenefits, benefits, productFilterRequest.getOptionFilter().getPriceFrom(), productFilterRequest.getOptionFilter().getPriceTo(), province.getId(), productFilterRequest.getAdults(), productFilterRequest.getChildren(), orderBy, dir, p);
         return result;
     }
 
