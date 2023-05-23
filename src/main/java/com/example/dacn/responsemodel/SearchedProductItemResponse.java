@@ -6,6 +6,7 @@ import java.util.List;
 
 @Data
 public class SearchedProductItemResponse {
+    private Long hotelId;
     private String name;
     private List<String> benefits;
     private AddressResponse address;
@@ -22,11 +23,12 @@ public class SearchedProductItemResponse {
     public SearchedProductItemResponse() {
     }
 
-    public SearchedProductItemResponse(String name, List<String> benefits, AddressResponse address, Double startRating, Double originalPrice, Double rentalPrice, Double finalPrice, AverageRatingResponse averageRating, DiscountResponse discount, Boolean isDeals, Boolean isOnlinePayment, Boolean isFreeCancellation) {
+    public SearchedProductItemResponse(Long hotelId, String name, List<String> benefits, AddressResponse address, Double starRating, Double originalPrice, Double rentalPrice, Double finalPrice, AverageRatingResponse averageRating, DiscountResponse discount, Boolean isDeals, Boolean isOnlinePayment, Boolean isFreeCancellation) {
+        this.hotelId = hotelId;
         this.name = name;
         this.benefits = benefits;
         this.address = address;
-        this.starRating = startRating;
+        this.starRating = starRating;
         this.originalPrice = originalPrice;
         this.rentalPrice = rentalPrice;
         this.finalPrice = finalPrice;
@@ -34,15 +36,6 @@ public class SearchedProductItemResponse {
         this.discount = discount;
         this.isDeals = isDeals;
         this.isOnlinePayment = isOnlinePayment;
-        this.isFreeCancellation = isFreeCancellation;
-    }
-
-    public SearchedProductItemResponse(String name, Double originalPrice, Double rentalPrice, Double finalPrice, Boolean isDeals, Boolean isFreeCancellation) {
-        this.name = name;
-        this.originalPrice = originalPrice;
-        this.rentalPrice = rentalPrice;
-        this.finalPrice = finalPrice;
-        this.isDeals = isDeals;
         this.isFreeCancellation = isFreeCancellation;
     }
 }

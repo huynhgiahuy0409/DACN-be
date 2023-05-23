@@ -37,8 +37,9 @@ public class SearchedProductService implements ISearchedProductService {
     private RoomRepository roomRepository;
     @Override
     public SearchedProductResponse getSearchedProductFromAutocomplete(ProductFilterRequest productFilterRequest) {
-        SearchedProductResponse result = new SearchedProductResponse();
+        SearchedProductResponse result = null;
         if (productFilterRequest.getType().equals("hotel")) {
+            result = new SearchedProductResponse();
             ValidSearchedProduct validFindHotel = this.hotelService.findSearchedProductItem(productFilterRequest);
             SearchedProductItemResponse thisValidProduct = validFindHotel != null? this.buildSearchProductItem(validFindHotel): null;
             result.setSearchedProduct(thisValidProduct);
@@ -49,8 +50,10 @@ public class SearchedProductService implements ISearchedProductService {
                 Object[] responses = Arrays.stream((Object[])hotelFacilityOption).map(o -> {
                     return o.toString();
                 }).toArray(Object[]::new);
-                ValidSearchedProduct validSearchedProduct = new ValidSearchedProduct(Long.parseLong(responses[0].toString()), Long.parseLong(responses[1].toString()));
-                relativeValidProductsResponse.add(this.buildSearchProductItem(validSearchedProduct));
+                if(Long.parseLong(responses[0].toString()) != productFilterRequest.getValue()){
+                    ValidSearchedProduct validSearchedProduct = new ValidSearchedProduct(Long.parseLong(responses[0].toString()), Long.parseLong(responses[1].toString()));
+                    relativeValidProductsResponse.add(this.buildSearchProductItem(validSearchedProduct));
+                }
             }
             result.setRelativeSearchedProducts(relativeValidProductsResponse);
             Double minPrice = this.roomService.minPriceByFilter(productFilterRequest);
@@ -85,7 +88,7 @@ public class SearchedProductService implements ISearchedProductService {
         Double starRating = this.hotelService.computeStarRating(foundHotel.getAveragePoints());
         AverageRatingResponse averageRatingResponse = this.hotelService.getAverageRatingResponse(foundHotel);
         DiscountResponse discountResponse = this.getDiscountResponse(foundRoom);
-        SearchedProductItemResponse result = new SearchedProductItemResponse(foundHotel.getName(), benefits, addressResponse, starRating,  foundRoom.getOriginPrice(), foundRoom.getRentalPrice(), foundRoom.getFinalPrice(),averageRatingResponse, discountResponse, foundHotel.getIsDeals(), foundRoom.getPaymentMethods().size() > 0, foundHotel.getIsFreeCancellation());
+        SearchedProductItemResponse result = new SearchedProductItemResponse(validSearchedProduct.getHotelId(), foundHotel.getName(), benefits, addressResponse, starRating,  foundRoom.getOriginPrice(), foundRoom.getRentalPrice(), foundRoom.getFinalPrice(),averageRatingResponse, discountResponse, foundHotel.getIsDeals(), foundRoom.getPaymentMethods().size() > 0, foundHotel.getIsFreeCancellation());
         return result;
     }
 

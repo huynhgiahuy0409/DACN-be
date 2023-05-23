@@ -66,44 +66,62 @@ public interface HotelRepository extends JpaRepository<HotelEntity, Long>, JpaSp
             "      group by h.id) result on result.hotelId = h1.id", nativeQuery = true)
     public Long countHotelByDiscountPercent(@Param("rate") Double rate,@Param("discount") Double discount ,@Param("checkHotelFacilities") Integer checkHotelFacilities,  @Param("hotelFacilities") List<Long> hotelFacilities,@Param("checkBenefits") Integer checkBenefits,  @Param("benefits") List<Long> benefits, @Param("priceFrom") Double priceFrom, @Param("priceTo") Double priceTo, @Param("provinceId") Long provinceId, @Param("maxAdults") Integer maxAdults, @Param("maxChildren") Integer maxChildren);
 
-    @Query("SELECT new com.example.dacn.model.ValidSearchedProduct(h.id, r.id) " +
-            "FROM HotelEntity h JOIN RoomEntity r ON h.id = r.hotel.id " +
-            "JOIN DiscountEntity d ON r.discount.id = d.id " +
-            "WHERE (:priceFrom IS NULL OR r.rentalPrice >= :priceFrom) " +
-            "AND (:priceTo IS NULL OR r.rentalPrice <= :priceTo) " +
-            "AND h.id = :hotelId " +
-            "AND r.maxAdults = :maxAdults " +
-            "AND r.maxChildren = :maxChildren  " +
-            "ORDER BY r.rentalPrice DESC"
-    )
-    public Page<ValidSearchedProduct> findValidSearchedProduct(@Param("priceFrom") Double priceFrom, @Param("priceTo") Double priceTo, @Param("hotelId") Long hotelId, @Param("maxAdults") Integer maxAdults, @Param("maxChildren") Integer maxChildren, Pageable pageable);
+    @Query(value = "SELECT foundResult.hotelId, r1.id\n" +
+            "FROM room r1\n" +
+            "         JOIN (\n" +
+            "    SELECT h.id as hotelId, h.name as hotelName, min(rental_price) as minPrice\n" +
+            "    FROM hotel h\n" +
+            "             JOIN address a ON h.address_id = a.id\n" +
+            "             JOIN province p ON a.province_id = p.id\n" +
+            "             JOIN room r ON r.hotel_id = h.id\n" +
+            "             JOIN hotel_facility hf ON hf.hotel_id = h.id\n" +
+            "             JOIN discount d ON r.discount_id = d.id\n" +
+            "             JOIN room_benefit rb ON r.id = rb.room_id\n" +
+            "    WHERE (:hotelId IS NULL OR h.id = :hotelId)\n" +
+            "      AND (:priceFrom IS NULL OR r.rental_price >= :priceFrom)\n" +
+            "      AND (:priceTo IS NULL OR r.rental_price <= :priceTo)\n" +
+            "      AND r.max_adults = :maxAdults\n" +
+            "      AND r.max_children = :maxChildren\n" +
+            "      AND (CASE WHEN :checkHotelFacilities != 0 THEN hf.facility_id IN (:hotelFacilities) ELSE hf.facility_id END)\n" +
+            "      AND (CASE WHEN :checkBenefits != 0 THEN rb.benefit_id IN (:benefits) ELSE rb.benefit_id END)\n" +
+            "      AND (:discount IS NULL OR d.discount_percent > :discount)\n" +
+            "      AND (:rate IS NULL OR h.average_points > :rate)\n" +
+            "    GROUP BY h.id\n" +
+            ") foundResult ON foundResult.minprice = r1.rental_price AND r1.hotel_id = foundResult.hotelId\n" +
+            "WHERE r1.rental_price = foundResult.minprice LIMIT 1", nativeQuery = true)
+    public Object findValidSearchedProduct(@Param("hotelId") Long hotelId,@Param("rate") String rate,@Param("discount") String discount ,@Param("checkHotelFacilities") Integer checkHotelFacilities,  @Param("hotelFacilities") List<Long> hotelFacilities,@Param("checkBenefits") Integer checkBenefits,  @Param("benefits") List<Long> benefits, @Param("priceFrom") Double priceFrom, @Param("priceTo") Double priceTo, @Param("maxAdults") Integer maxAdults, @Param("maxChildren") Integer maxChildren);
 
     @Query(value = "SELECT foundResult.hotelId, r1.id, hotelName, r1.rental_price, rate\n" +
             "FROM room r1\n" +
-            "         JOIN\n" +
-            "     (SELECT h.id as hotelId, h.name as hotelName, min(rental_price) as minPrice, h.average_points as rate\n, r.id as roomId" +
-            "      FROM hotel h\n" +
-            "               JOIN address a on h.address_id = a.id\n" +
-            "               JOIN province p on a.province_id = p.id\n" +
-            "               JOIN room r ON r.hotel_id = h.id\n JOIN benefit" +
-            "               JOIN hotel_facility as hf ON hf.hotel_id = h.id\n " +
-            "               JOIN discount as d ON r.discount_id = d.id " +
-            "               JOIN room_benefit rb on r.id = rb.room_id" +
-            "      WHERE p.id = :provinceId\n" +
-            "        and (:priceFrom IS NULL OR r.rental_price >= :priceFrom)\n" +
-            "        and (:priceTo IS NULL OR r.rental_price <= :priceTo)\n" +
-            "        and r.max_adults = :maxAdults\n" +
-            "        and r.max_children = :maxChildren\n" +
-            "        AND (CASE WHEN :checkHotelFacilities != 0 THEN hf.facility_id IN (:hotelFacilities) ELSE hf.facility_id END) \n " +
-            "         AND (CASE WHEN :checkBenefits != 0 THEN rb.benefit_id IN (:benefits) ELSE rb.benefit_id END) \n " +
-            "        AND (:discount IS NULL OR d.discount_percent > :discount) " +
-            "        AND (:rate IS NULL OR h.average_points > :rate) " +
-            "GROUP BY h.id) foundResult ON foundResult.minprice = r1.rental_price AND r1.hotel_id = foundResult.hotelId AND foundResult.roomId = r1.id where r1.rental_price = foundResult.minprice GROUP BY foundResult.hotelId, foundResult.minPrice, rate, hotelName " +
-            "ORDER BY " +
-            "CASE WHEN :dir ='ASc' THEN " +
-            "CASE WHEN :orderBy = 'price' THEN minPrice WHEN :orderBy = 'name' THEN hotelName WHEN :orderBy = 'rate' THEN rate ELSE hotelID END END ASC, " +
-            "CASE WHEN :dir ='desc' THEN " +
-            "CASE WHEN :orderBy = 'price' THEN minPrice WHEN :orderBy = 'name' THEN hotelName WHEN :orderBy = 'rate' THEN rate ELSE hotelID END END DESC", nativeQuery = true)
+            "JOIN (\n" +
+            "    SELECT h.id as hotelId, h.name as hotelName, min(rental_price) as minPrice, h.average_points as rate, r.id as roomId\n" +
+            "    FROM hotel h\n" +
+            "    JOIN address a ON h.address_id = a.id\n" +
+            "    JOIN province p ON a.province_id = p.id\n" +
+            "    JOIN room r ON r.hotel_id = h.id\n" +
+            "    JOIN hotel_facility hf ON hf.hotel_id = h.id\n" +
+            "    JOIN discount d ON r.discount_id = d.id\n" +
+            "    JOIN room_benefit rb ON r.id = rb.room_id\n" +
+            "    WHERE (:provinceId IS NULL OR p.id = :provinceId)\n" +
+            "    AND (:priceFrom IS NULL OR r.rental_price >= :priceFrom)\n" +
+            "    AND (:priceTo IS NULL OR r.rental_price <= :priceTo)\n" +
+            "    AND r.max_adults = :maxAdults\n" +
+            "    AND r.max_children = :maxChildren\n" +
+            "    AND (CASE WHEN :checkHotelFacilities != 0 THEN hf.facility_id IN (:hotelFacilities) ELSE hf.facility_id END)\n" +
+            "    AND (CASE WHEN :checkBenefits != 0 THEN rb.benefit_id IN (:benefits) ELSE rb.benefit_id END)\n" +
+            "    AND (:discount IS NULL OR d.discount_percent > :discount)\n" +
+            "    AND (:rate IS NULL OR h.average_points > :rate)\n" +
+            "    GROUP BY h.id\n" +
+            ") foundResult ON foundResult.minprice = r1.rental_price AND r1.hotel_id = foundResult.hotelId AND foundResult.roomId = r1.id\n" +
+            "WHERE r1.rental_price = foundResult.minprice\n" +
+            "GROUP BY foundResult.hotelId, foundResult.minPrice, rate, hotelName\n" +
+            "ORDER BY\n" +
+            "    CASE WHEN :dir = 'asc' THEN\n" +
+            "        CASE WHEN :orderBy = 'price' THEN minPrice WHEN :orderBy = 'name' THEN hotelName WHEN :orderBy = 'rate' THEN rate ELSE hotelId END\n" +
+            "    END ASC,\n" +
+            "    CASE WHEN :dir = 'desc' THEN\n" +
+            "        CASE WHEN :orderBy = 'price' THEN minPrice WHEN :orderBy = 'name' THEN hotelName WHEN :orderBy = 'rate' THEN rate ELSE hotelId END\n" +
+            "    END DESC", nativeQuery = true)
     public List<Object> findValidRelativeSearchedProduct(@Param("rate") String rate,@Param("discount") String discount ,@Param("checkHotelFacilities") Integer checkHotelFacilities,  @Param("hotelFacilities") List<Long> hotelFacilities,@Param("checkBenefits") Integer checkBenefits,  @Param("benefits") List<Long> benefits, @Param("priceFrom") Double priceFrom, @Param("priceTo") Double priceTo, @Param("provinceId") Long provinceId, @Param("maxAdults") Integer maxAdults, @Param("maxChildren") Integer maxChildren, @Param("orderBy") String orderBy, @Param("dir") String dir, Pageable pageable);
 
 //    FROM room r1
