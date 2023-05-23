@@ -88,7 +88,9 @@ public class SearchedProductService implements ISearchedProductService {
         Double starRating = this.hotelService.computeStarRating(foundHotel.getAveragePoints());
         AverageRatingResponse averageRatingResponse = this.hotelService.getAverageRatingResponse(foundHotel);
         DiscountResponse discountResponse = this.getDiscountResponse(foundRoom);
-        SearchedProductItemResponse result = new SearchedProductItemResponse(validSearchedProduct.getHotelId(), foundHotel.getName(), benefits, addressResponse, starRating,  foundRoom.getOriginPrice(), foundRoom.getRentalPrice(), foundRoom.getFinalPrice(),averageRatingResponse, discountResponse, foundHotel.getIsDeals(), foundRoom.getPaymentMethods().size() > 0, foundHotel.getIsFreeCancellation());
+        Set<HotelImageEntity> hotelImageEntities = foundHotel.getHotelImages();
+        Set<ImageResponse> hotelImages = hotelImageEntities.stream().map(i -> new ImageResponse(i.getIsThumbnail(), i.getUrl())).collect(Collectors.toSet());
+        SearchedProductItemResponse result = new SearchedProductItemResponse(validSearchedProduct.getHotelId(), foundHotel.getName(), benefits, addressResponse, starRating,  foundRoom.getOriginPrice(), foundRoom.getRentalPrice(), foundRoom.getFinalPrice(),averageRatingResponse, discountResponse, foundHotel.getIsDeals(), foundRoom.getPaymentMethods().size() > 0, foundHotel.getIsFreeCancellation(), hotelImages);
         return result;
     }
 

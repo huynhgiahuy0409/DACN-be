@@ -2,7 +2,9 @@ package com.example.dacn.responsemodel;
 
 import lombok.Data;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class SearchedProductItemResponse {
@@ -19,11 +21,12 @@ public class SearchedProductItemResponse {
     private Boolean isDeals;
     private Boolean isOnlinePayment;
     private Boolean isFreeCancellation;
+    private Collection<ImageResponse> hotelImages;
 
     public SearchedProductItemResponse() {
     }
 
-    public SearchedProductItemResponse(Long hotelId, String name, List<String> benefits, AddressResponse address, Double starRating, Double originalPrice, Double rentalPrice, Double finalPrice, AverageRatingResponse averageRating, DiscountResponse discount, Boolean isDeals, Boolean isOnlinePayment, Boolean isFreeCancellation) {
+    public SearchedProductItemResponse(Long hotelId, String name, List<String> benefits, AddressResponse address, Double starRating, Double originalPrice, Double rentalPrice, Double finalPrice, AverageRatingResponse averageRating, DiscountResponse discount, Boolean isDeals, Boolean isOnlinePayment, Boolean isFreeCancellation, Collection<ImageResponse> hotelImages) {
         this.hotelId = hotelId;
         this.name = name;
         this.benefits = benefits;
@@ -37,5 +40,6 @@ public class SearchedProductItemResponse {
         this.isDeals = isDeals;
         this.isOnlinePayment = isOnlinePayment;
         this.isFreeCancellation = isFreeCancellation;
+        this.hotelImages = hotelImages;
     }
 }
