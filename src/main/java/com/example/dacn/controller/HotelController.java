@@ -51,7 +51,6 @@ public class HotelController {
     @GetMapping("/hotel_profiles")
     public List<HotelEntity> getAllHotelEntitys() throws Exception {
        return hotelService.getAllHotel();
-
     }
 
 

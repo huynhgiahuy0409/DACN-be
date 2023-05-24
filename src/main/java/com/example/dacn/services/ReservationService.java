@@ -13,8 +13,6 @@ public interface ReservationService {
 
     List<ReservationResponse> findAllByUsername(String username);
 
-    ReservationResponse save(ReservationRequest request) throws Exception;
-
     ReservationResponse cancelReservation(Long id, String username) throws Exception;
 
     List<ReservationResponse> saveAll(List<ReservationRequest> request);

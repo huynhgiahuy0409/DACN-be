@@ -13,6 +13,7 @@ import com.example.dacn.specification.ReservationSpecification;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
@@ -84,46 +85,6 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public ReservationResponse save(ReservationRequest request) throws Exception {
-        HotelEntity hotel = hotelService.findById(request.getHotelId());
-        RoomEntity room = roomService.findByHotelAndRoomId(request.getHotelId(), request.getRoomId());
-        if (null == hotel || null == room) throw new Exception("Đặt phòng thất bại do phòng không tồn tại !");
-        if (request.getAdult() > room.getMaxAdults() || request.getChildren() > room.getMaxChildren())
-            throw new Exception("Số lượng người vượt quá ngưỡng cho phép");
-        List<Long> reservedList = findReservationBefore(request.getHotelId(), request.getRoomId(), request.getStartDate(), request.getEndDate());
-        if (reservedList.size() > 0) throw new Exception("Phòng đã có khách hàng đặt vui lòng chọn phòng khác !");
-
-        UserEntity existedUser = userService.findByUsernameOrEmail(request.getUsername(), request.getEmail());
-        if (null == existedUser) {
-            GuestDTO guest = GuestDTO.builder()
-                    .username(UUID.randomUUID().toString())
-                    .password(UUID.randomUUID().toString())
-                    .fullName(request.getFullName())
-                    .email(request.getEmail())
-                    .phone(request.getPhone())
-                    .build();
-            existedUser = userService.saveGuest(guest);
-        }
-
-        ReservationEntity reservation = ReservationEntity.builder()
-                .adult(request.getAdult())
-                .discountPercent(request.getDiscountPercent())
-                .price(request.getPrice())
-                .children(request.getChildren())
-                .endDate(request.getEndDate())
-                .startDate(request.getStartDate())
-                .hotel(hotel)
-                .room(room)
-                .user(existedUser)
-                .status(ReservationStatus.PENDING)
-                .build();
-        ReservationEntity savedEntity = repository.save(reservation);
-        emailService.sendReservationMail(savedEntity.getId(), request.getEmail(), hotel.getName(),
-                hotel.getAddress().getProvince().get_name(), request.getPrice(), request.getStartDate(), request.getEndDate());
-        return getReservationResponse(savedEntity);
-    }
-
-    @Override
     public ReservationResponse cancelReservation(Long id, String username) throws Exception {
         Optional<ReservationEntity> foundReservation = repository.findById(id);
         if (!foundReservation.isPresent() || !foundReservation.get().getUser().getUsername().equals(username))
@@ -150,38 +111,20 @@ public class ReservationServiceImpl implements ReservationService {
         }
     }
 
-    private ReservationResponse getReservationResponse(ReservationEntity updatedReservation) {
+    private ReservationResponse getReservationResponse(ReservationEntity reservation) {
         return ReservationResponse.builder()
-                .id(updatedReservation.getId())
-                .price(updatedReservation.getPrice())
-                .adult(updatedReservation.getAdult())
-                .children(updatedReservation.getChildren())
-                .startDate(updatedReservation.getStartDate())
-                .endDate(updatedReservation.getEndDate())
-                .discountPercent(updatedReservation.getDiscountPercent())
-                .status(updatedReservation.getStatus())
-                .room(mapper.map(updatedReservation.getRoom(), RoomResponse.class))
-                .hotel(mapper.map(updatedReservation.getHotel(), HotelResponse.class))
+                .id(reservation.getId())
+                .price(reservation.getPrice())
+                .adult(reservation.getAdult())
+                .children(reservation.getChildren())
+                .startDate(reservation.getStartDate())
+                .endDate(reservation.getEndDate())
+                .discountPercent(reservation.getDiscountPercent())
+                .status(reservation.getStatus())
+                .room(mapper.map(reservation.getRoom(), RoomResponse.class))
+                .hotel(mapper.map(reservation.getHotel(), HotelResponse.class))
                 .build();
     }
-
-//    private HotelRoomDto checkReservedBefore(ReservationRequest request) {
-//        try {
-//            HotelEntity hotel = hotelService.findById(request.getHotelId());
-//            RoomEntity room = roomService.findByHotelAndRoomId(request.getHotelId(), request.getRoomId());
-//            if (null == hotel || null == room) throw new Exception("Đặt phòng thất bại do phòng không tồn tại !");
-//            if (request.getAdult() > room.getMaxAdults() || request.getChildren() > room.getMaxChildren())
-//                throw new Exception("Số lượng người vượt quá ngưỡng cho phép");
-//            List<Long> reservedList = findReservationBefore(request.getHotelId(), request.getRoomId(), request.getStartDate(), request.getEndDate());
-//            if (reservedList.size() > 0) throw new Exception("Phòng đã có khách hàng đặt vui lòng chọn phòng khác !");
-//            return HotelRoomDto.builder()
-//                    .hotel(hotel)
-//                    .room(room)
-//                    .build();
-//        } catch (Exception e) {
-//            return null;
-//        }
-//    }
 
     public List<ReservationEntity> getUpcomingSaveReservationList(List<ReservationRequest> requestList) throws Exception {
         List<ReservationEntity> re = new ArrayList<>();
@@ -207,10 +150,15 @@ public class ReservationServiceImpl implements ReservationService {
             }
             if (null != hotel && null != room && request.getAdult() <= room.getMaxAdults()
                     && request.getChildren() <= room.getMaxChildren() && reservedList.size() == 0) {
+                Double discountPercent;
+                if (ObjectUtils.isEmpty(room.getDiscount()) || room.getDiscount().getDiscountPercent() <= 0)
+                    discountPercent = null;
+                else
+                    discountPercent = room.getDiscount().getDiscountPercent();
                 ReservationEntity reservation = ReservationEntity.builder()
                         .adult(request.getAdult())
                         .discountPercent(request.getDiscountPercent())
-                        .price(getPriceByNights(request.getStartDate(), request.getEndDate(), room.getFinalPrice()))
+                        .price(getPriceByNights(request.getStartDate(), request.getEndDate(), room.getOriginPrice(), discountPercent))
                         .children(request.getChildren())
                         .endDate(request.getEndDate())
                         .startDate(request.getStartDate())
@@ -225,11 +173,17 @@ public class ReservationServiceImpl implements ReservationService {
         return re;
     }
 
-    private static double getPriceByNights(LocalDate startDate, LocalDate endDate, Double price) {
-        return calculateNumberOfNights(startDate, endDate) * price;
+    private double getPriceByNights(LocalDate startDate, LocalDate endDate, Double price, Double discount) {
+        if (discount > 0) {
+            double priceBeforeDiscount = calculateNumberOfNights(startDate, endDate) * price;
+            double discountAmount = priceBeforeDiscount * (discount / 100);
+            return priceBeforeDiscount - discountAmount;
+        } else {
+            return calculateNumberOfNights(startDate, endDate) * price;
+        }
     }
 
-    public static int calculateNumberOfNights(LocalDate startDate, LocalDate endDate) {
+    private int calculateNumberOfNights(LocalDate startDate, LocalDate endDate) {
         int numberOfNights = 0;
 
         while (startDate.isBefore(endDate)) {
@@ -240,38 +194,4 @@ public class ReservationServiceImpl implements ReservationService {
         return numberOfNights;
     }
 
-//    public ReservationResponse saveWithoutSendMail(ReservationRequest request) throws Exception {
-//        HotelEntity hotel = hotelService.findById(request.getHotelId());
-//        RoomEntity room = roomService.findByHotelAndRoomId(request.getHotelId(), request.getRoomId());
-//        if (null == hotel || null == room) throw new Exception("Đặt phòng thất bại do phòng không tồn tại !");
-//        if (request.getAdult() > room.getMaxAdults() || request.getChildren() > room.getMaxChildren())
-//            throw new Exception("Số lượng người vượt quá ngưỡng cho phép");
-//
-//        UserEntity existedUser = userService.findByUsernameOrEmail(request.getUsername(), request.getEmail());
-//        if (null == existedUser) {
-//            GuestDTO guest = GuestDTO.builder()
-//                    .username(UUID.randomUUID().toString())
-//                    .password(UUID.randomUUID().toString())
-//                    .fullName(request.getFullName())
-//                    .email(request.getEmail())
-//                    .phone(request.getPhone())
-//                    .build();
-//            existedUser = userService.saveGuest(guest);
-//        }
-//
-//        ReservationEntity reservation = ReservationEntity.builder()
-//                .adult(request.getAdult())
-//                .discountPercent(request.getDiscountPercent())
-//                .price(request.getPrice())
-//                .children(request.getChildren())
-//                .endDate(request.getEndDate())
-//                .startDate(request.getStartDate())
-//                .hotel(hotel)
-//                .room(room)
-//                .user(existedUser)
-//                .status(ReservationStatus.PENDING)
-//                .build();
-//        ReservationEntity savedEntity = repository.save(reservation);
-//        return getReservationResponse(savedEntity);
-//    }
 }

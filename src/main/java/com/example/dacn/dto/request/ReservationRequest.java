@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @Data
 @Getter
 public class ReservationRequest {
-    private Double price;
     private Integer adult;
     private Integer children;
     @DateTimeFormat(pattern = "dd/MM/yyyy")

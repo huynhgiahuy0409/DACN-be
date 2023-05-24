@@ -31,4 +31,5 @@ public class CartResponse {
     private String roomType;
     private Set<BenefitResponse> benefits;
     private RoomStatus status;
+    private Double discountPercent;
 }

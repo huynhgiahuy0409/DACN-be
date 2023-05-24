@@ -19,7 +19,6 @@ public class RoomEntity extends BaseEntity {
     private String status;
     private Double originPrice;
     private Double rentalPrice;
-
     private Double finalPrice;
 
     @ManyToOne

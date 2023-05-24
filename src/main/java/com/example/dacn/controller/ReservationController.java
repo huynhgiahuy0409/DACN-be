@@ -38,16 +38,6 @@ public class ReservationController {
         }
     }
 
-    @PostMapping("/saveReservation")
-    public ResponseEntity<?> saveReservation(@RequestBody ReservationRequest request) {
-        try {
-            ReservationResponse reservationResponse = service.save(request);
-            return ResponseEntity.ok().body(reservationResponse);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
-
     @PostMapping("/saveAllReservation")
     public ResponseEntity<?> saveAllReservation(@RequestBody List<ReservationRequest> request) {
         try {
