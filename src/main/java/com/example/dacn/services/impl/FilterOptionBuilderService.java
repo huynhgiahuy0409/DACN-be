@@ -83,7 +83,7 @@ public class FilterOptionBuilderService implements IFilterOptionBuilderService {
                 result.add(filterOptionItemResponse);
             });
         } else if (type.equals("rate")) {
-            Double discountPercent = productFilterRequest.getOptionFilter().getDiscount() != null ? Double.parseDouble(productFilterRequest.getOptionFilter().getDiscount()) : null;
+            Double discountPercent = productFilterRequest.getOptionFilter().getDiscount() != null ? productFilterRequest.getOptionFilter().getDiscount() : null;
             Long countHotelUp7 = this.hotelRepository.countHotelsByPoint(Double.parseDouble("7"), discountPercent, checkHotelFacilityIds, hotelFacilities, checkBenefits, benefits, productFilterRequest.getOptionFilter().getPriceFrom(), productFilterRequest.getOptionFilter().getPriceTo(), province.getId(), productFilterRequest.getAdults(), productFilterRequest.getChildren());
             Long countHotelUp8 = this.hotelRepository.countHotelsByPoint(Double.parseDouble("8"), discountPercent, checkHotelFacilityIds, hotelFacilities, checkBenefits, benefits, productFilterRequest.getOptionFilter().getPriceFrom(), productFilterRequest.getOptionFilter().getPriceTo(), province.getId(), productFilterRequest.getAdults(), productFilterRequest.getChildren());
             Long countHotelUp9 = this.hotelRepository.countHotelsByPoint(Double.parseDouble("9"), discountPercent, checkHotelFacilityIds, hotelFacilities, checkBenefits, benefits, productFilterRequest.getOptionFilter().getPriceFrom(), productFilterRequest.getOptionFilter().getPriceTo(), province.getId(), productFilterRequest.getAdults(), productFilterRequest.getChildren());
@@ -98,7 +98,7 @@ public class FilterOptionBuilderService implements IFilterOptionBuilderService {
                 result.add(filterOptionItemResponse);
             });
         } else if (type.equals("discount")) {
-            Double ratePoint = productFilterRequest.getOptionFilter().getGuestRating() != null ? Double.parseDouble(productFilterRequest.getOptionFilter().getGuestRating()) : null;
+            Double ratePoint = productFilterRequest.getOptionFilter().getGuestRating() != null ? productFilterRequest.getOptionFilter().getGuestRating() : null;
             Long countUpper10PercentDiscount = this.hotelRepository.countHotelByDiscountPercent(ratePoint, Double.parseDouble("10"), checkHotelFacilityIds, hotelFacilities, checkBenefits, benefits, productFilterRequest.getOptionFilter().getPriceFrom(), productFilterRequest.getOptionFilter().getPriceTo(), province.getId(), productFilterRequest.getAdults(), productFilterRequest.getChildren());
             Long countUpper50PercentDiscount = this.hotelRepository.countHotelByDiscountPercent(ratePoint, Double.parseDouble("50"), checkHotelFacilityIds, hotelFacilities, checkBenefits, benefits, productFilterRequest.getOptionFilter().getPriceFrom(), productFilterRequest.getOptionFilter().getPriceTo(), province.getId(), productFilterRequest.getAdults(), productFilterRequest.getChildren());
             FilterOptionItemResponse i1 = new FilterOptionItemResponse("10", "Giảm từ 30% trở lên", countUpper10PercentDiscount);

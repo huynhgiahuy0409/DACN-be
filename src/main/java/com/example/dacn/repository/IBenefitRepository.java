@@ -37,6 +37,6 @@ public interface IBenefitRepository extends JpaRepository<BenefitEntity, Long>, 
                 "  AND (:discount IS NULL OR d.discount_percent > :discount)\n" +
                 "  AND (:rate IS NULL OR h.average_points > :rate)\n" +
                 "group by rb.benefit_id, h.id) result on b.id = result.benefitId group by result.benefitId ORDER BY countHotel DESC", nativeQuery = true)
-        public List<Object> findBenefitOptions(@Param("rate") String rate,@Param("discount") String discount ,@Param("checkHotelFacilities") Integer checkHotelFacilities,  @Param("hotelFacilities") List<Long> hotelFacilities,@Param("checkBenefits") Integer checkBenefits,  @Param("benefits") List<Long> benefits, @Param("priceFrom") Double priceFrom, @Param("priceTo") Double priceTo, @Param("provinceId") Long provinceId, @Param("maxAdults") Integer maxAdults, @Param("maxChildren") Integer maxChildren, Pageable pageable);
+        public List<Object> findBenefitOptions(@Param("rate") Double rate,@Param("discount") Double discount ,@Param("checkHotelFacilities") Integer checkHotelFacilities,  @Param("hotelFacilities") List<Long> hotelFacilities,@Param("checkBenefits") Integer checkBenefits,  @Param("benefits") List<Long> benefits, @Param("priceFrom") Double priceFrom, @Param("priceTo") Double priceTo, @Param("provinceId") Long provinceId, @Param("maxAdults") Integer maxAdults, @Param("maxChildren") Integer maxChildren, Pageable pageable);
 
 }

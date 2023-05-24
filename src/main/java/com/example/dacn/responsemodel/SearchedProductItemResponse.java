@@ -4,11 +4,10 @@ import lombok.Data;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @Data
 public class SearchedProductItemResponse {
-    private Long hotelId;
+    private Long productId;
     private String name;
     private List<String> benefits;
     private AddressResponse address;
@@ -26,8 +25,8 @@ public class SearchedProductItemResponse {
     public SearchedProductItemResponse() {
     }
 
-    public SearchedProductItemResponse(Long hotelId, String name, List<String> benefits, AddressResponse address, Double starRating, Double originalPrice, Double rentalPrice, Double finalPrice, AverageRatingResponse averageRating, DiscountResponse discount, Boolean isDeals, Boolean isOnlinePayment, Boolean isFreeCancellation, Collection<ImageResponse> hotelImages) {
-        this.hotelId = hotelId;
+    public SearchedProductItemResponse(Long productId, String name, List<String> benefits, AddressResponse address, Double starRating, Double originalPrice, Double rentalPrice, Double finalPrice, AverageRatingResponse averageRating, DiscountResponse discount, Boolean isDeals, Boolean isOnlinePayment, Boolean isFreeCancellation, Collection<ImageResponse> hotelImages) {
+        this.productId = productId;
         this.name = name;
         this.benefits = benefits;
         this.address = address;

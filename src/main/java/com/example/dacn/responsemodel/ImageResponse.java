@@ -11,4 +11,7 @@ public class ImageResponse {
         this.isThumbnail = isThumbnail;
         this.url = url;
     }
+
+    public ImageResponse() {
+    }
 }

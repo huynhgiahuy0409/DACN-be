@@ -167,17 +167,15 @@ public class HotelServiceImpl implements HotelService {
         Long hotelId = productFilterRequest.getValue();
         HotelEntity searchedHotel = this.getOne(hotelId);
         ProvinceEntity province = searchedHotel.getAddress().getProvince();
+        System.out.println(province);
         Pageable p = PageRequest.of(0, 20);
         List<Object> result;
-        String dir;
-        String orderBy;
+        String dir = "desc";
+        String orderBy = null;
         ProductSortRequest productSort = productFilterRequest.getProductSort();
-        if (productSort != null) {
-            dir = productFilterRequest.getProductSort().getDirection();
+        if (productSort != null && productSort.getDirection() != null && productSort.getProperty() != null) {
+            dir = productSort.getDirection();
             orderBy = productSort.getProperty();
-        } else {
-            dir = "desc";
-            orderBy = "";
         }
         List<Long> hotelFacilities = Arrays.asList();
         List<Long> benefits = Arrays.asList();
@@ -192,6 +190,7 @@ public class HotelServiceImpl implements HotelService {
             benefits = optionFilterRequest.getBenefits();
             checkBenefits = optionFilterRequest.getBenefits().size();
         }
+        System.out.println("passing " + dir + orderBy);
         result = this.repository.findValidRelativeSearchedProduct(productFilterRequest.getOptionFilter().getGuestRating(), productFilterRequest.getOptionFilter().getDiscount(), checkHotelFacilityIds, hotelFacilities, checkBenefits, benefits, productFilterRequest.getOptionFilter().getPriceFrom(), productFilterRequest.getOptionFilter().getPriceTo(), province.getId(), productFilterRequest.getAdults(), productFilterRequest.getChildren(), orderBy, dir, p);
         return result;
     }

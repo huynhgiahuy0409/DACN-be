@@ -2,6 +2,7 @@ package com.example.dacn.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Nationalized;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -14,6 +15,9 @@ import java.util.Set;
 @Setter
 public class HotelEntity extends BaseEntity {
     private String name;
+
+    @Column(name = "description", length = 255)
+    @Nationalized
     private String description;
     private Double averagePoints;
     private String status;

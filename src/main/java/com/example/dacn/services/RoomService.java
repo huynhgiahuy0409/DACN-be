@@ -3,6 +3,7 @@ package com.example.dacn.services;
 import com.example.dacn.dto.response.RoomResponse;
 import com.example.dacn.entity.RoomEntity;
 import com.example.dacn.requestmodel.ProductFilterRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -22,4 +23,6 @@ public interface RoomService {
     RoomEntity findMinimumPriceRoom(Long hotelId);
     Double minPriceByFilter(ProductFilterRequest productFilterRequest);
     Double maxPriceByFilter(ProductFilterRequest productFilterRequest);
+
+    List<Long> findAllValidRoom(ProductFilterRequest productFilterRequest, Pageable pageable);
 }
