@@ -2,6 +2,7 @@ package com.example.dacn.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
 import java.util.LinkedHashSet;
@@ -18,6 +19,7 @@ public class RoomEntity extends BaseEntity {
     private String status;
     private Double originPrice;
     private Double rentalPrice;
+
     private Double finalPrice;
 
     @ManyToOne
@@ -43,7 +45,7 @@ public class RoomEntity extends BaseEntity {
     @JoinTable(name = "room_payment_method", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "payment_method"))
     private Set<PaymentMethodEntity> paymentMethods = new LinkedHashSet<PaymentMethodEntity>();
 
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name = "discount_id")
     private DiscountEntity discount;
 
@@ -54,21 +56,10 @@ public class RoomEntity extends BaseEntity {
     private Set<CartEntity> cartItems = new LinkedHashSet<CartEntity>();
 
     public RoomEntity(){
-        this.updateSellingPrice();
-    }
-
-    public Double getFinalPrice() {
-        this.updateSellingPrice();
-        System.out.println(this.finalPrice);
-        return this.finalPrice;
-    }
-
-    public void setFinalPrice(Double finalPrice) {
-        this.finalPrice = finalPrice;
+        System.out.println("final Price"  + this.finalPrice);
     }
 
     @PostLoad
-    @PostUpdate
     public void updateSellingPrice() {
         DiscountEntity roomDiscount = this.discount;
         if(roomDiscount != null){

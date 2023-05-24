@@ -13,6 +13,7 @@ import com.example.dacn.services.RoomService;
 import com.example.dacn.specification.RoomSpecification;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -100,5 +101,10 @@ public class RoomServiceImpl implements RoomService {
         }
 
         return this.repository.findMaxPriceByFilter(value, productFilterRequest.getAdults(), productFilterRequest.getChildren());
+    }
+
+    @Override
+    public List<Long> findAllValidRoom(ProductFilterRequest productFilterRequest, Pageable pageable) {
+        return this.repository.findAllValidRoom(productFilterRequest.getValue(), productFilterRequest.getAdults(), productFilterRequest.getChildren(),pageable);
     }
 }

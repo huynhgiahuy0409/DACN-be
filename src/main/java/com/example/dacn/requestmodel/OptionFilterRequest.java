@@ -8,8 +8,8 @@ import java.util.List;
 public class OptionFilterRequest {
     private List<Long> hotelFacilities;
     private List<Long> benefits;
-    private String guestRating;
-    private String discount;
+    private Double guestRating;
+    private Double discount;
     private Double priceFrom;
     private Double priceTo;
 }
