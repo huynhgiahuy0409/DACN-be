@@ -12,10 +12,10 @@ public class CartSpecification {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("sessionId"), sessionId);
     }
 
-    public static Specification<CartEntity> hasHotelRoomSessionId(Long hotelId, Long roomId, String sessionId) {
+    public static Specification<CartEntity> hasHotelRoomSessionId(Long roomId, String sessionId) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get("hotel").get("id"), hotelId));
+//            predicates.add(cb.equal(root.get("hotel").get("id"), hotelId));
             predicates.add(cb.equal(root.get("room").get("id"), roomId));
             predicates.add(cb.equal(root.get("sessionId"), sessionId));
             return cb.and(predicates.toArray(new Predicate[0]));

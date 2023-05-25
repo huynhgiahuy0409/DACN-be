@@ -64,8 +64,8 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public List<Long> findReservationBefore(Long hotelId, Long roomId, LocalDate startDate, LocalDate endDate) {
-        return repository.findAll(ReservationSpecification.hasReserveBefore(hotelId, roomId, startDate, endDate))
+    public List<Long> findReservationBefore(Long roomId, LocalDate startDate, LocalDate endDate) {
+        return repository.findAll(ReservationSpecification.hasReserveBefore(roomId, startDate, endDate))
                 .stream().map(BaseEntity::getId).collect(Collectors.toList());
     }
 
@@ -116,8 +116,6 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
 
-
-
     private ReservationResponse getReservationResponse(ReservationEntity reservation) {
 
         return ReservationResponse.builder()
@@ -140,9 +138,9 @@ public class ReservationServiceImpl implements ReservationService {
         for (ReservationRequest request : requestList) {
             HotelEntity hotel = hotelService.findById(request.getHotelId());
 
-            RoomEntity room = roomService.findByHotelAndRoomId(request.getHotelId(), request.getRoomId());
-
-            List<Long> reservedList = findReservationBefore(request.getHotelId(), request.getRoomId(), request.getStartDate(), request.getEndDate());
+            Optional<RoomEntity> foundRoom = roomService.findByRoomId(request.getRoomId());
+            RoomEntity room = foundRoom.orElse(null);
+            List<Long> reservedList = findReservationBefore(request.getRoomId(), request.getStartDate(), request.getEndDate());
 
             UserEntity existedUser = userService.findByUsernameOrEmail(request.getUsername(), request.getEmail());
 
@@ -156,7 +154,7 @@ public class ReservationServiceImpl implements ReservationService {
                         .build();
                 existedUser = userService.saveGuest(guest);
             }
-            if (null != hotel && null != room && request.getAdult() <= room.getMaxAdults()
+            if (null != hotel && !ObjectUtils.isEmpty(room) && request.getAdult() <= room.getMaxAdults()
                     && request.getChildren() <= room.getMaxChildren() && reservedList.size() == 0) {
                 Double discountPercent;
                 if (ObjectUtils.isEmpty(room.getDiscount()) || room.getDiscount().getDiscountPercent() <= 0)

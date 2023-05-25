@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface CartRepository extends JpaRepository<CartEntity, Long>, JpaSpecificationExecutor<CartEntity> {
     void deleteByIdIn(List<Long> ids);
+    CartEntity findFirstBySessionIdAndRoomId(String sessionId,Long roomId);
 }

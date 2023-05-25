@@ -10,10 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReservationSpecification {
-    public static Specification<ReservationEntity> hasReserveBefore(Long hotelId, Long roomId, LocalDate startDate, LocalDate endDate) {
+    public static Specification<ReservationEntity> hasReserveBefore(Long roomId, LocalDate startDate, LocalDate endDate) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get("hotel").get("id"), hotelId));
             predicates.add(cb.equal(root.get("room").get("id"), roomId));
             predicates.add(
                     cb.or(

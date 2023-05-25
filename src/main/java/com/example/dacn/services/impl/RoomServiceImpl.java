@@ -10,22 +10,17 @@ import com.example.dacn.repository.HotelRepository;
 
 import com.example.dacn.repository.RoomRepository;
 import com.example.dacn.requestmodel.ProductFilterRequest;
-import com.example.dacn.requestmodel.ProductSortRequest;
 import com.example.dacn.services.RoomService;
-import com.example.dacn.specification.RoomSpecification;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -41,17 +36,18 @@ public class RoomServiceImpl implements RoomService {
     private HotelRepository hotelRepository;
 
     @Override
-    public RoomEntity findByHotelAndRoomId(Long hotelId, Long roomId) {
-        return repository.findAll(RoomSpecification.hasHotelAndRoomId(hotelId, roomId)).get(0);
+    public Optional<RoomEntity> findByRoomId(Long roomId) {
+        return repository.findById(roomId);
     }
 
     @Override
     public RoomResponse setRoomStatus(Long hotelId, Long roomId, String status) throws Exception {
-        RoomEntity foundRoom = findByHotelAndRoomId(hotelId, roomId);
-        if (null == foundRoom) throw new Exception("Phòng không tồn tại");
-        foundRoom.setStatus(status);
-        repository.save(foundRoom);
-        return mapper.map(foundRoom, RoomResponse.class);
+        Optional<RoomEntity> foundRoom = findByRoomId(roomId);
+        if (!foundRoom.isPresent()) throw new Exception("Phòng không tồn tại");
+        RoomEntity room = foundRoom.get();
+        room.setStatus(status);
+        repository.save(room);
+        return mapper.map(room, RoomResponse.class);
     }
 
     public RoomEntity getRoom(Long id) throws Exception {
@@ -102,7 +98,6 @@ public class RoomServiceImpl implements RoomService {
     }
 
 
-
     public RoomEntity findOne(Specification<RoomEntity> spec) {
         if (this.repository.findOne(spec).isPresent()) {
             return this.repository.findOne(spec).get();
@@ -134,14 +129,15 @@ public class RoomServiceImpl implements RoomService {
     public RoomEntity findMinimumPriceRoom(Long hotelId) {
         return repository.findFirstByHotelIdOrderByFinalPriceAsc(hotelId);
     }
+
     public Double minPriceByFilter(ProductFilterRequest productFilterRequest) {
         Long value;
-        if(productFilterRequest.getType().equals("hotel")){
+        if (productFilterRequest.getType().equals("hotel")) {
             Long hotelId = productFilterRequest.getValue();
             HotelEntity searchedHotel = this.hotelRepository.getOne(hotelId);
             ProvinceEntity province = searchedHotel.getAddress().getProvince();
             value = province.getId();
-        }else{
+        } else {
             value = productFilterRequest.getValue();
         }
         return this.repository.findMinPriceByFilter(value, productFilterRequest.getAdults(), productFilterRequest.getChildren());
@@ -150,12 +146,12 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public Double maxPriceByFilter(ProductFilterRequest productFilterRequest) {
         Long value;
-        if(productFilterRequest.getType().equals("hotel")){
+        if (productFilterRequest.getType().equals("hotel")) {
             Long hotelId = productFilterRequest.getValue();
             HotelEntity searchedHotel = this.hotelRepository.getOne(hotelId);
             ProvinceEntity province = searchedHotel.getAddress().getProvince();
             value = province.getId();
-        }else{
+        } else {
             value = productFilterRequest.getValue();
         }
 
@@ -164,7 +160,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public List<Long> findAllValidRoom(ProductFilterRequest productFilterRequest, Pageable pageable) {
-        return this.repository.findAllValidRoom(productFilterRequest.getValue(), productFilterRequest.getAdults(), productFilterRequest.getChildren(),pageable);
+        return this.repository.findAllValidRoom(productFilterRequest.getValue(), productFilterRequest.getAdults(), productFilterRequest.getChildren(), pageable);
     }
 
 }

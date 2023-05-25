@@ -13,7 +13,6 @@ public class CartRequest {
     private LocalDate fromDate;
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     private LocalDate toDate;
-    private Long hotelId;
     private Long roomId;
     private String sessionId;
 }

@@ -12,7 +12,7 @@ import java.util.List;
 public interface ReservationService {
     ReservationResponse findById(Long id) throws Exception;
 
-    List<Long> findReservationBefore(Long hotelId, Long roomId, LocalDate startDate, LocalDate endDate);
+    List<Long> findReservationBefore(Long roomId, LocalDate startDate, LocalDate endDate);
 
     List<ReservationResponse> findAllByUsername(String username);
 
