@@ -2,7 +2,7 @@ package com.example.dacn.services.impl;
 
 import com.example.dacn.dto.GuestDTO;
 import com.example.dacn.dto.UserDTO;
-import com.example.dacn.model.UserEntity;
+import com.example.dacn.entity.UserEntity;
 import com.example.dacn.repository.IUserRepository;
 import com.example.dacn.services.IUserService;
 import com.example.dacn.specification.UserSpecification;
@@ -12,7 +12,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.ModelMap;
 
 import java.util.List;
 import java.util.UUID;

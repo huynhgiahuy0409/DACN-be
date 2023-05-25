@@ -1,6 +1,6 @@
 package com.example.dacn.repository;
 
-import com.example.dacn.model.CartEntity;
+import com.example.dacn.entity.CartEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 

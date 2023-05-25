@@ -1,10 +1,8 @@
 package com.example.dacn.specification;
 
-import com.example.dacn.model.CartEntity;
-import com.example.dacn.model.HotelEntity;
+import com.example.dacn.entity.CartEntity;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;

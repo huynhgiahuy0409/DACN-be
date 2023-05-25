@@ -2,7 +2,7 @@ package com.example.dacn.services;
 
 import com.example.dacn.dto.GuestDTO;
 import com.example.dacn.dto.UserDTO;
-import com.example.dacn.model.UserEntity;
+import com.example.dacn.entity.UserEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public interface IUserService {

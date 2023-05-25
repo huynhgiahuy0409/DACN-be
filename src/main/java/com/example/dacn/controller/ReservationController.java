@@ -4,8 +4,7 @@ import com.example.dacn.dto.ReservationDTO;
 import com.example.dacn.dto.request.CancelReservationRequest;
 import com.example.dacn.dto.request.ReservationRequest;
 import com.example.dacn.dto.response.ReservationResponse;
-import com.example.dacn.model.ReservationEntity;
-import com.example.dacn.model.RoomEntity;
+
 import com.example.dacn.services.ReservationDTOService;
 import com.example.dacn.services.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,16 +38,6 @@ public class ReservationController {
         try {
             List<ReservationResponse> list = service.findAllByUsername(username);
             return ResponseEntity.ok().body(list);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
-
-    @PostMapping("/saveReservation")
-    public ResponseEntity<?> saveReservation(@RequestBody ReservationRequest request) {
-        try {
-            ReservationResponse reservationResponse = service.save(request);
-            return ResponseEntity.ok().body(reservationResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

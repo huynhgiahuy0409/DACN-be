@@ -1,33 +1,27 @@
 package com.example.dacn.services.impl;
 
-import com.example.dacn.dto.HotelRoomDto;
 import com.example.dacn.dto.request.CartRequest;
-import com.example.dacn.dto.request.ReservationRequest;
 import com.example.dacn.dto.response.BenefitResponse;
 import com.example.dacn.dto.response.CartResponse;
 import com.example.dacn.dto.response.HotelResponse;
 import com.example.dacn.dto.response.RoomResponse;
+import com.example.dacn.entity.CartEntity;
+import com.example.dacn.entity.DiscountEntity;
+import com.example.dacn.entity.HotelEntity;
+import com.example.dacn.entity.RoomEntity;
 import com.example.dacn.enums.RoomStatus;
-import com.example.dacn.model.CartEntity;
-import com.example.dacn.model.HotelEntity;
-import com.example.dacn.model.HotelImageEntity;
-import com.example.dacn.model.RoomEntity;
 import com.example.dacn.repository.CartRepository;
-import com.example.dacn.services.CartService;
-import com.example.dacn.services.HotelService;
-import com.example.dacn.services.ReservationService;
-import com.example.dacn.services.RoomService;
+import com.example.dacn.services.*;
 import com.example.dacn.specification.CartSpecification;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +34,8 @@ public class CartServiceImpl implements CartService {
     private RoomService roomService;
     @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private IHotelImageService imageService;
     @Autowired
     private ModelMapper mapper;
 
@@ -56,14 +52,20 @@ public class CartServiceImpl implements CartService {
                         .hotel(mapper.map(i.getHotel(), HotelResponse.class))
                         .room(mapper.map(i.getRoom(), RoomResponse.class))
                         .sessionId(i.getSessionId())
-                        .address(i.getHotel().getAddress().getProvince().get_name())
-                        .bannerImage(findFirstThumbnail(i.getHotel().getHotelImages()))
+                        .address(i.getHotel().getAddress().getProvince().get_code())
+                        .bannerImage(imageService.findFirstBannerImage(i.getHotel().getId()))
                         .totalReviews(i.getHotel().getRatings().size())
                         .roomType(i.getRoom().getRoomType().getName())
                         .benefits(i.getRoom().getBenefits().stream().map(item -> mapper.map(item, BenefitResponse.class)).collect(Collectors.toSet()))
                         .status(isReservedBefore(i.getHotel(), i.getRoom(), i.getFromDate(), i.getToDate()))
+                        .discountPercent(getDiscountPercent(i.getRoom().getDiscount()))
                         .build()
         ).collect(Collectors.toList());
+    }
+
+    private Double getDiscountPercent(DiscountEntity discount) {
+        if (ObjectUtils.isEmpty(discount)) return 0.0;
+        return discount.getDiscountPercent();
     }
 
     @Override
@@ -92,7 +94,23 @@ public class CartServiceImpl implements CartService {
                 .sessionId(cart.getSessionId())
                 .build();
         CartEntity addedCartItem = repository.save(cartEntity);
-        return mapper.map(addedCartItem, CartResponse.class);
+        return CartResponse.builder()
+                .id(addedCartItem.getId())
+                .adult(addedCartItem.getAdult())
+                .child(addedCartItem.getChild())
+                .fromDate(addedCartItem.getFromDate())
+                .toDate(addedCartItem.getToDate())
+                .hotel(mapper.map(addedCartItem.getHotel(), HotelResponse.class))
+                .room(mapper.map(addedCartItem.getRoom(), RoomResponse.class))
+                .sessionId(addedCartItem.getSessionId())
+                .address(addedCartItem.getHotel().getAddress().getWard().get_name() + " ," + addedCartItem.getHotel().getAddress().getProvince().get_code())
+                .bannerImage(imageService.findFirstBannerImage(addedCartItem.getHotel().getId()))
+                .totalReviews(addedCartItem.getHotel().getRatings().size())
+                .roomType(addedCartItem.getRoom().getRoomType().getName())
+                .benefits(addedCartItem.getRoom().getBenefits().stream().map(i -> mapper.map(i, BenefitResponse.class)).collect(Collectors.toSet()))
+                .status(isReservedBefore(addedCartItem.getHotel(), addedCartItem.getRoom(), addedCartItem.getFromDate(), addedCartItem.getToDate()))
+                .discountPercent(getDiscountPercent(addedCartItem.getRoom().getDiscount()))
+                .build();
     }
 
     @Override
@@ -104,14 +122,6 @@ public class CartServiceImpl implements CartService {
     @Transactional // delete by each id in list
     public void deleteByIds(List<Long> ids) throws Exception {
         repository.deleteByIdIn(ids);
-    }
-
-    private String findFirstThumbnail(Set<HotelImageEntity> images) {
-        Optional<HotelImageEntity> image = images.stream()
-                .filter(item -> item.getIsThumbnail().equals(true))
-                .findFirst();
-        if (!image.isPresent()) return "";
-        return image.get().getUrl();
     }
 
     private RoomStatus isReservedBefore(HotelEntity hotel, RoomEntity room, LocalDate startDate, LocalDate endDate) {

@@ -1,7 +1,7 @@
 package com.example.dacn.services;
 
 import com.example.dacn.dto.JWTDTO;
-import com.example.dacn.model.JWTEntity;
+import com.example.dacn.entity.JWTEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

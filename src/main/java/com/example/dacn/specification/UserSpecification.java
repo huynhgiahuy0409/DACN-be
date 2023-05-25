@@ -1,6 +1,6 @@
 package com.example.dacn.specification;
 
-import com.example.dacn.model.UserEntity;
+import com.example.dacn.entity.UserEntity;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Predicate;
