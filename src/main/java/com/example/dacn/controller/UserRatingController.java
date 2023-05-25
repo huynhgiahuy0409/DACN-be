@@ -1,8 +1,7 @@
 package com.example.dacn.controller;
 
 import com.example.dacn.dto.RatingDTO;
-import com.example.dacn.model.HotelEntity;
-import com.example.dacn.model.UserRating;
+
 import com.example.dacn.services.impl.HotelServiceImpl;
 import com.example.dacn.services.impl.UserRatingServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;

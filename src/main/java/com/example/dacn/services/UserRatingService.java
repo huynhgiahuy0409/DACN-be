@@ -1,8 +1,8 @@
 package com.example.dacn.services;
 
 import com.example.dacn.dto.RatingDTO;
-import com.example.dacn.model.HotelEntity;
-import com.example.dacn.model.UserRating;
+import com.example.dacn.entity.UserRating;
+
 
 import java.util.List;
 

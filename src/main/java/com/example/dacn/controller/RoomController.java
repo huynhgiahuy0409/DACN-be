@@ -1,8 +1,6 @@
 package com.example.dacn.controller;
 
-import com.example.dacn.model.HotelEntity;
-import com.example.dacn.model.RoomEntity;
-import com.example.dacn.services.impl.HotelServiceImpl;
+import com.example.dacn.entity.RoomEntity;
 import com.example.dacn.services.impl.RoomServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

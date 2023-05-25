@@ -1,8 +1,9 @@
 package com.example.dacn.services.impl;
 
 import com.example.dacn.dto.RatingDTO;
-import com.example.dacn.model.UserRating;
 
+
+import com.example.dacn.entity.UserRating;
 import com.example.dacn.repository.UserRatingRepository;
 import com.example.dacn.services.UserRatingService;
 import org.springframework.beans.factory.annotation.Autowired;

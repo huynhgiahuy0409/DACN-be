@@ -1,6 +1,7 @@
 package com.example.dacn.services;
 
-import com.example.dacn.model.AddressEntity;
+
+import com.example.dacn.entity.AddressEntity;
 
 public interface AddressService {
 

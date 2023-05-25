@@ -2,8 +2,8 @@ package com.example.dacn.services.impl;
 
 import com.example.dacn.dto.RatingDTO;
 import com.example.dacn.dto.ReservationDTO;
-import com.example.dacn.model.ReservationEntity;
-import com.example.dacn.model.UserRating;
+
+import com.example.dacn.entity.ReservationEntity;
 import com.example.dacn.repository.ReservationRepository;
 import com.example.dacn.services.ReservationDTOService;
 import org.springframework.beans.factory.annotation.Autowired;

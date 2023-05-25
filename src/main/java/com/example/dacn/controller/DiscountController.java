@@ -1,8 +1,8 @@
 package com.example.dacn.controller;
 
 
-import com.example.dacn.model.DiscountEntity;
 
+import com.example.dacn.entity.DiscountEntity;
 import com.example.dacn.services.impl.DiscountServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

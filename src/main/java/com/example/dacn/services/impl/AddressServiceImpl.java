@@ -1,6 +1,6 @@
 package com.example.dacn.services.impl;
 
-import com.example.dacn.model.AddressEntity;
+import com.example.dacn.entity.AddressEntity;
 import com.example.dacn.repository.AddressRepository;
 import com.example.dacn.services.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;

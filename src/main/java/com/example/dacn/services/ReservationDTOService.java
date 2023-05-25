@@ -1,7 +1,8 @@
 package com.example.dacn.services;
 
 import com.example.dacn.dto.ReservationDTO;
-import com.example.dacn.model.ReservationEntity;
+import com.example.dacn.entity.ReservationEntity;
+
 
 import java.util.List;
 

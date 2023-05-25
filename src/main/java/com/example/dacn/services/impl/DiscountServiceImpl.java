@@ -1,7 +1,7 @@
 package com.example.dacn.services.impl;
 
-import com.example.dacn.model.AddressEntity;
-import com.example.dacn.model.DiscountEntity;
+
+import com.example.dacn.entity.DiscountEntity;
 import com.example.dacn.repository.AddressRepository;
 import com.example.dacn.repository.DiscountRepository;
 import com.example.dacn.services.AddressService;

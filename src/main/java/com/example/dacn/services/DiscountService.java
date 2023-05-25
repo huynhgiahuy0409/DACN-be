@@ -1,7 +1,7 @@
 package com.example.dacn.services;
 
-import com.example.dacn.model.AddressEntity;
-import com.example.dacn.model.DiscountEntity;
+
+import com.example.dacn.entity.DiscountEntity;
 import org.springframework.stereotype.Service;
 
 @Service

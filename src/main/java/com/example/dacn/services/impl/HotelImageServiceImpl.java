@@ -1,6 +1,7 @@
 package com.example.dacn.services.impl;
 
-import com.example.dacn.model.HotelImageEntity;
+
+import com.example.dacn.entity.HotelImageEntity;
 import com.example.dacn.repository.HotelImageRepository;
 import com.example.dacn.services.HotelImageService;
 import com.example.dacn.services.HotelService;
