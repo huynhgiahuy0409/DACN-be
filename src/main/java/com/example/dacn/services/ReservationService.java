@@ -4,9 +4,7 @@ import com.example.dacn.dto.RatingDTO;
 import com.example.dacn.dto.ReservationDTO;
 import com.example.dacn.dto.request.ReservationRequest;
 import com.example.dacn.dto.response.ReservationResponse;
-import com.example.dacn.model.ReservationEntity;
-import com.example.dacn.model.RoomEntity;
-import com.example.dacn.model.UserRating;
+
 
 import java.time.LocalDate;
 import java.util.List;
