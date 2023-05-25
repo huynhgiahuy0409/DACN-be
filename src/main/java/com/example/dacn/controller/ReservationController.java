@@ -1,8 +1,12 @@
 package com.example.dacn.controller;
 
+import com.example.dacn.dto.ReservationDTO;
 import com.example.dacn.dto.request.CancelReservationRequest;
 import com.example.dacn.dto.request.ReservationRequest;
 import com.example.dacn.dto.response.ReservationResponse;
+import com.example.dacn.model.ReservationEntity;
+import com.example.dacn.model.RoomEntity;
+import com.example.dacn.services.ReservationDTOService;
 import com.example.dacn.services.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +22,8 @@ public class ReservationController {
     @Autowired
     private ReservationService service;
 
+    @Autowired
+    private ReservationDTOService serviceDTO;
     @GetMapping("/getReservationById/{id}")
     public ResponseEntity<?> getReservationById(@PathVariable("id") Long id) {
         try {
@@ -67,5 +73,9 @@ public class ReservationController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+    @GetMapping("/getAllReservations")
+    public List<ReservationDTO> getAllReservations() throws Exception {
+        return serviceDTO.getReservationDTO();
 
+    }
 }

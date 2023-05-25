@@ -1,5 +1,6 @@
 package com.example.dacn.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,6 +25,7 @@ public class RoomEntity extends BaseEntity {
     private RoomTypeEntity roomType;
 
     @ManyToOne
+
     @JoinColumn(name = "hotel_id")
     private HotelEntity hotel;
 
