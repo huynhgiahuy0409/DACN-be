@@ -123,6 +123,29 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public CartResponse findBySessionIdAndRoomId(String sessionId, Long roomId) throws Exception {
+        CartEntity existedItem = repository.findFirstBySessionIdAndRoomId(sessionId, roomId);
+        if (ObjectUtils.isEmpty(existedItem)) throw new Exception("Phòng không tồn tại !");
+        return CartResponse.builder()
+                .id(existedItem.getId())
+                .adult(existedItem.getAdult())
+                .child(existedItem.getChild())
+                .fromDate(existedItem.getFromDate())
+                .toDate(existedItem.getToDate())
+                .hotel(mapper.map(existedItem.getHotel(), HotelResponse.class))
+                .room(mapper.map(existedItem.getRoom(), RoomResponse.class))
+                .sessionId(existedItem.getSessionId())
+                .address(existedItem.getHotel().getAddress().getProvince().get_code())
+                .bannerImage(imageService.findFirstBannerImage(existedItem.getHotel().getId()))
+                .totalReviews(existedItem.getHotel().getRatings().size())
+                .roomType(existedItem.getRoom().getRoomType().getName())
+                .benefits(existedItem.getRoom().getBenefits().stream().map(item -> mapper.map(item, BenefitResponse.class)).collect(Collectors.toSet()))
+                .status(isReservedBefore(existedItem.getHotel(), existedItem.getRoom(), existedItem.getFromDate(), existedItem.getToDate()))
+                .discountPercent(getDiscountPercent(existedItem.getRoom().getDiscount()))
+                .build();
+    }
+
+    @Override
     public void deleteCartItemById(Long id) throws Exception {
         repository.deleteById(id);
     }

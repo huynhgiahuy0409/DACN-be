@@ -2,6 +2,7 @@ package com.example.dacn.controller;
 
 import com.example.dacn.dto.request.CartRequest;
 import com.example.dacn.dto.response.CartResponse;
+import com.example.dacn.requestmodel.FindCartRequest;
 import com.example.dacn.responsemodel.APIResponse;
 import com.example.dacn.services.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,15 @@ public class CartController {
         } catch (Exception e) {
             APIResponse response = new APIResponse(new String("Xóa thất bại"), "Xóa thất bại", 400);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    @PostMapping("/getBySessionIdAndRoomId")
+    public ResponseEntity<?> getBySessionIdAndRoomId(@RequestBody FindCartRequest request) {
+        try {
+            return ResponseEntity.ok(service.findBySessionIdAndRoomId(request.getSessionId(), request.getRoomId()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }
