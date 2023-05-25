@@ -50,29 +50,32 @@ public class HotelController {
     @Autowired
     @GetMapping("/hotel_profiles")
     public List<HotelEntity> getAllHotelEntitys() throws Exception {
+
        return hotelService.getAllHotel();
+
     }
 
 
     @PostMapping("/hotel_profile")
     public HotelEntity createHotelEntity(@RequestBody HotelEntity hp) throws Exception {
-      return hotelService.createHotel(hp);
+        return hotelService.createHotel(hp);
     }
 
     @GetMapping("/hotel_profiles/{id}")
     public HotelEntity getHotelEntity(@PathVariable Long id) throws Exception {
-       return hotelService.getHotel(id);
+        return hotelService.getHotel(id);
     }
 
     @PutMapping("/hotel_profiles/{id}")
     public ResponseEntity<HotelEntity> updateHotelEntity(@PathVariable Long id, @RequestBody HotelEntity hotelEntity) throws Exception {
-      return hotelService.updateHotel(id,hotelEntity);
-      
+        return hotelService.updateHotel(id, hotelEntity);
+
     }
 
     @DeleteMapping("/hotel_profiles/{id}")
     public ResponseEntity<Map<String, Boolean>> deleteHotelEntity(@PathVariable Long id) throws Exception {
         return hotelService.deleteHotel(id);
+
     }
     @GetMapping("/autocomplete-search/{searchValue}")
     public ResponseEntity autocompleteSearchedHotel(@PathVariable String searchValue) {
@@ -106,5 +109,6 @@ public class HotelController {
         }).collect(Collectors.toList());
         ProductDetailResponse result = new ProductDetailResponse(hotel, rooms);
         return ResponseEntity.ok(result);
+
     }
 }

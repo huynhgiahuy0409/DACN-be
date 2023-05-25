@@ -40,7 +40,9 @@ public class HotelServiceImpl implements HotelService {
         HotelEntity h = repository.findById(id).orElseThrow(() -> new Exception("Hotel not found" + id));
         return ResponseEntity.ok(h).getBody();
 
+
     }
+
 
     @Override
     public HotelEntity getOne(Long id) {

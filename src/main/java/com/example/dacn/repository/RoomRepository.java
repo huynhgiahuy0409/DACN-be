@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface RoomRepository extends JpaRepository<RoomEntity, Long>, JpaSpecificationExecutor<RoomEntity> {
+
     RoomEntity findFirstByHotelIdOrderByFinalPriceAsc(Long hotelId);
 
     @Query(value = "SELECT MIN(minPrice)\n" +
@@ -34,4 +35,5 @@ public interface RoomRepository extends JpaRepository<RoomEntity, Long>, JpaSpec
 
     @Query(value = "SELECT r.id, r.rental_price  FROM room r join hotel h on r.hotel_id = h.id where r.max_adults >= :maxAdults and r.max_children >= :maxChildren and h.id = :hotelId ORDER BY  r.rental_price ASC", nativeQuery = true)
     List<Long> findAllValidRoom(@Param("hotelId") Long hotelId, @Param("maxAdults") Integer maxAdults, @Param("maxChildren") Integer maxChildren, Pageable p);
+
 }

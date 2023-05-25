@@ -1,5 +1,7 @@
 package com.example.dacn.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +17,7 @@ import javax.persistence.Table;
 public class HotelImageEntity  extends ImageBase{
 
     @ManyToOne
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JoinColumn(name = "hotel_id")
     private HotelEntity hotel;
 }

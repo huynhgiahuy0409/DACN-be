@@ -1,5 +1,6 @@
 package com.example.dacn.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -25,10 +26,12 @@ public class UserRating {
     private Double points;
 
     @ManyToOne
+
     @JoinColumn(name = "username")
     private UserEntity user;
 
     @ManyToOne
+
     @JoinColumn(name = "hotel_id")
     private HotelEntity hotel;
 }
