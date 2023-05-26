@@ -24,5 +24,7 @@ public class WebConfig implements WebMvcConfigurer {
         // TODO Auto-generated method stub
         registry.addResourceHandler("/uploads/hotel-img/**")
                 .addResourceLocations("file:" + System.getProperty("user.dir") + "/src/main/resources/uploads/hotel-img/");
+        registry.addResourceHandler("/uploads/room-img/**")
+                .addResourceLocations("file:" + System.getProperty("user.dir") + "/src/main/resources/uploads/room-img/");
     }
 }
