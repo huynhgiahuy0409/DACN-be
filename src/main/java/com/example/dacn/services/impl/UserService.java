@@ -74,7 +74,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public boolean checkExistUsername(String username) {
+    public boolean checkExistUser(String username) {
         UserEntity foundUser = this.userRepository.findByUsername(username);
         if (foundUser != null) {
             return true;

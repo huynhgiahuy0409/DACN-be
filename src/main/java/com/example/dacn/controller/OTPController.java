@@ -1,17 +1,19 @@
 package com.example.dacn.controller;
 
 import com.example.dacn.constance.SystemConstance;
-import com.example.dacn.requestmodel.SignUpFormRequest;
+import com.example.dacn.entity.UserEntity;
+import com.example.dacn.enums.OTPType;
+import com.example.dacn.enums.UserStatus;
 import com.example.dacn.responsemodel.APIResponse;
 import com.example.dacn.services.IOTPService;
+import com.example.dacn.services.IUserService;
 import com.example.dacn.services.impl.JavaMailSenderService;
 import com.example.dacn.template.MailTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
@@ -21,9 +23,13 @@ import java.util.Map;
 @RestController
 @RequestMapping(value = "/api/otp")
 public class OTPController {
+    @Autowired
+    private IUserService userService;
+    @Autowired
+    private IOTPService registerOTPService;
 
     @Autowired
-    private IOTPService OTPService;
+    private IOTPService changePasswordOTPService;
 
     @Autowired
     private JavaMailSenderService javaMailSenderService;
@@ -32,13 +38,20 @@ public class OTPController {
     public String mailHTMLPath;
 
 
-    @PostMapping("/generate-otp")
-    public ResponseEntity generateOTP(@RequestParam String username) {
-        int OTP = this.OTPService.generateOTP(username);
+    @GetMapping("/generate-otp")
+    public ResponseEntity generateOTP(@RequestParam String username, @RequestParam OTPType otpType) {
+        System.out.println(otpType);
+        System.out.println(otpType.equals(OTPType.REGISTER));
+        int generatedOTPNumber;
+        if(otpType.equals(OTPType.REGISTER)){
+            generatedOTPNumber = this.registerOTPService.generateOTP(username);
+        }else{
+            generatedOTPNumber = this.changePasswordOTPService.generateOTP(username);
+        }
         MailTemplate mailTemplate = new MailTemplate(this.mailHTMLPath);
         Map<String, String> replacements = new HashMap<String, String>();
         replacements.put("username", username);
-        replacements.put("OTPNumber", String.valueOf(OTP));
+        replacements.put("OTPNumber", String.valueOf(generatedOTPNumber));
         replacements.put("applicationName", SystemConstance.APPLICATION_NAME);
         String message = mailTemplate.getTemplate(replacements);
         try {
@@ -51,12 +64,24 @@ public class OTPController {
         }
     }
 
-    @PostMapping("/validate-otp")
-    public ResponseEntity validateOtp(@RequestParam String username, @RequestBody int OTPNumber) {
-        int serverOTP = this.OTPService.getOTP(username);
-        if (serverOTP > 0) {
-            if (OTPNumber == serverOTP) {
-                this.OTPService.clearOTP(username);
+    @GetMapping("/validate-otp")
+    public ResponseEntity validateOtp(@RequestParam String username, @RequestParam int OTPNumber, @RequestParam OTPType otpType) {
+        int foundOTPNUmber;
+        if(otpType.equals(OTPType.REGISTER)){
+            foundOTPNUmber = this.registerOTPService.getOTP(username);
+        }else{
+            foundOTPNUmber = this.changePasswordOTPService.getOTP(username);
+        }
+        if (foundOTPNUmber > 0) {
+            if (OTPNumber == foundOTPNUmber) {
+                if(otpType.equals(OTPType.REGISTER)){
+                    UserEntity foundUser = this.userService.findByUsername(username);
+                    foundUser.setStatus(UserStatus.ACTIVATED);
+                    this.userService.save(foundUser);
+                    this.registerOTPService.clearOTP(username);
+                }else{
+                    this.changePasswordOTPService.clearOTP(username);
+                }
                 APIResponse<String> response = new APIResponse<>("Xác thực thành công", HttpStatus.OK.getReasonPhrase(), HttpStatus.OK.value());
                 return ResponseEntity.ok(response);
             } else {
@@ -67,5 +92,17 @@ public class OTPController {
             APIResponse<String> response = new APIResponse<>("Mã xác thực không hợp lệ hoặc đã hết hạn. Vui lòng thử lại", HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase(), HttpStatus.UNPROCESSABLE_ENTITY.value());
             return ResponseEntity.ok(response);
         }
+    }
+    @GetMapping(value = "/forget-password")
+    public ResponseEntity<Boolean> changePassword(@RequestBody String username) {
+        if (!StringUtils.isEmpty(username)) {
+            String refactorUsername = StringUtils.trimAllWhitespace(username);
+            UserEntity foundUser = this.userService.findByUsername(refactorUsername);
+            if (foundUser != null) {
+                return ResponseEntity.ok(true);
+            }
+            return ResponseEntity.ok(false);
+        }
+        return ResponseEntity.ok(false);
     }
 }

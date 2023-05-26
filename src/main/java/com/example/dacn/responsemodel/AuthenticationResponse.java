@@ -6,12 +6,12 @@ import lombok.Data;
 
 @Data
 public class AuthenticationResponse {
-    private UserDTO userDTO;
+    private UserDTO user;
     private JWTDTO accessToken;
     private JWTDTO refreshToken;
 
-    public AuthenticationResponse(UserDTO userDTO, JWTDTO accessToken, JWTDTO refreshToken) {
-        this.userDTO = userDTO;
+    public AuthenticationResponse(UserDTO user, JWTDTO accessToken, JWTDTO refreshToken) {
+        this.user = user;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
     }
