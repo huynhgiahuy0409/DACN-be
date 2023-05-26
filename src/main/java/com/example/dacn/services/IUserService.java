@@ -15,11 +15,13 @@ public interface IUserService {
 
     boolean checkValidPassword(String password);
 
-    boolean checkExistUsername(String username);
+    boolean checkExistUser(String username);
 
     UserDTO save(UserEntity user);
 
     UserEntity findByUsernameOrEmail(String username, String email);
 
     UserEntity saveGuest(GuestDTO guest);
+
+
 }

@@ -3,6 +3,7 @@ package com.example.dacn.entity;
 import com.example.dacn.enums.Gender;
 import com.example.dacn.enums.Role;
 import com.example.dacn.enums.UserStatus;
+import com.example.dacn.enums.OAuthProvider;
 
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -36,6 +37,7 @@ public class UserEntity {
     @Enumerated(EnumType.ORDINAL)
     private Role role;
 
+    private OAuthProvider provider;
 //    @ManyToOne
 //    @JoinColumn(name = "role_id")
 //    private RoleEntity role;
