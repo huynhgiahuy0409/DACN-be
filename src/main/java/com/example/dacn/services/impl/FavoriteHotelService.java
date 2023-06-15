@@ -5,6 +5,7 @@ import com.example.dacn.entity.HotelEntity;
 import com.example.dacn.entity.UserEntity;
 import com.example.dacn.repository.IFavoriteHotelRepository;
 import com.example.dacn.requestmodel.SaveFavoriteHotelRequest;
+import com.example.dacn.responsemodel.APIResponse;
 import com.example.dacn.responsemodel.FavoriteHotelResponse;
 import com.example.dacn.services.HotelService;
 import com.example.dacn.services.IFavoriteHotelService;
@@ -48,7 +49,7 @@ public class FavoriteHotelService implements IFavoriteHotelService {
     }
 
     @Override
-    public FavoriteHotelResponse save(SaveFavoriteHotelRequest request) throws Exception {
+    public APIResponse save(SaveFavoriteHotelRequest request) throws Exception {
         HotelEntity hotel = hotelService.findById(request.getHotelId());
         if (hotel == null) throw new Exception("Không tìm thấy khách sạn tương ứng !");
         UserEntity user = userService.findByUsername(request.getUsername());
@@ -56,7 +57,7 @@ public class FavoriteHotelService implements IFavoriteHotelService {
         FavoriteHotelEntity existedItem = favoriteHotelRepository.findFirstByUserUsernameAndHotelId(request.getUsername(), request.getHotelId());
         if (existedItem != null) {
             favoriteHotelRepository.delete(existedItem);
-            return FavoriteHotelResponse.builder()
+            return new APIResponse(FavoriteHotelResponse.builder()
                     .id(hotel.getId())
                     .name(existedItem.getHotel().getName())
                     .bannerUrl(imageService.findFirstBannerImage(existedItem.getHotel().getId()))
@@ -65,7 +66,7 @@ public class FavoriteHotelService implements IFavoriteHotelService {
                     .finalPrice(roomService.findMinimumPriceRoom(existedItem.getHotel().getId()).getFinalPrice())
                     .avgRating(existedItem.getHotel().getAveragePoints())
                     .totalRating(existedItem.getHotel().getRatings().size())
-                    .build();
+                    .build(), "Xóa khách sạn yêu thích thành công !", 200);
         }
         FavoriteHotelEntity favoriteHotel = FavoriteHotelEntity.builder()
                 .hotel(hotel)
@@ -74,7 +75,7 @@ public class FavoriteHotelService implements IFavoriteHotelService {
 
         FavoriteHotelEntity savedFavoriteHotel = favoriteHotelRepository.save(favoriteHotel);
 
-        return FavoriteHotelResponse.builder()
+        return new APIResponse(FavoriteHotelResponse.builder()
                 .id(savedFavoriteHotel.getId())
                 .hotelId(savedFavoriteHotel.getHotel().getId())
                 .name(savedFavoriteHotel.getHotel().getName())
@@ -84,7 +85,7 @@ public class FavoriteHotelService implements IFavoriteHotelService {
                 .finalPrice(roomService.findMinimumPriceRoom(savedFavoriteHotel.getHotel().getId()).getFinalPrice())
                 .avgRating(savedFavoriteHotel.getHotel().getAveragePoints())
                 .totalRating(savedFavoriteHotel.getHotel().getRatings().size())
-                .build();
+                .build(), "Thêm khách sạn yêu thích thành công !", 200);
     }
 
     @Override
