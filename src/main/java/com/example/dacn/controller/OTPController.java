@@ -55,7 +55,7 @@ public class OTPController {
         replacements.put("applicationName", SystemConstance.APPLICATION_NAME);
         String message = mailTemplate.getTemplate(replacements);
         try {
-            this.javaMailSenderService.sendOTPMessage(username, "Rental Car: Confirm OTP to sign up", message);
+            this.javaMailSenderService.sendOTPMessage(username, "Hotel Booking: Confirm OTP to sign up", message);
             APIResponse<String> response = new APIResponse<>("Mã xác thực đã được gửi đến email của bạn", HttpStatus.CREATED.getReasonPhrase(), HttpStatus.CREATED.value());
             return ResponseEntity.ok(response);
         } catch (MessagingException e) {
