@@ -1,10 +1,6 @@
 package com.example.dacn.services.impl;
 
 import com.example.dacn.dto.GuestDTO;
-
-import com.example.dacn.dto.HotelRoomDto;
-import com.example.dacn.dto.RatingDTO;
-import com.example.dacn.dto.ReservationDTO;
 import com.example.dacn.dto.request.ReservationRequest;
 import com.example.dacn.dto.response.HotelResponse;
 import com.example.dacn.dto.response.ReservationResponse;
@@ -164,7 +160,7 @@ public class ReservationServiceImpl implements ReservationService {
                 ReservationEntity reservation = ReservationEntity.builder()
                         .adult(request.getAdult())
                         .discountPercent(request.getDiscountPercent())
-                        .price(getPriceByNights(request.getStartDate(), request.getEndDate(), room.getOriginPrice(), discountPercent))
+                        .price(getPriceByNights(request.getStartDate(), request.getEndDate(), room.getRentalPrice(), discountPercent))
                         .children(request.getChildren())
                         .endDate(request.getEndDate())
                         .startDate(request.getStartDate())
