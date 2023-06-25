@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/favorites")
+
 public class FavoriteHotelController {
     @Autowired
     private IFavoriteHotelService favoriteHotelService;

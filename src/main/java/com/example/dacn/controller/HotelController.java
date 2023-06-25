@@ -1,8 +1,6 @@
 package com.example.dacn.controller;
 
-import com.example.dacn.entity.AddressEntity;
-import com.example.dacn.entity.HotelEntity;
-import com.example.dacn.entity.RoomEntity;
+import com.example.dacn.entity.*;
 import com.example.dacn.model.SearchedProductSorter;
 import com.example.dacn.repository.HotelRepository;
 import com.example.dacn.repository.RoomRepository;
@@ -18,8 +16,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.example.dacn.dto.response.AutocompleteSearchResponse;
@@ -98,7 +98,7 @@ public class HotelController {
         List<RoomEntity> roomEntities = validRoomIds.stream().map(id -> this.roomService.getOne(id)).collect(Collectors.toList());
         HotelResponse hotel = this.mp.map(hotelEntity, HotelResponse.class);
         AddressEntity a = hotelEntity.getAddress();
-        AddressResponse addressResponse = new AddressResponse(a.getId(), a.getStreet(), a.getProvince().get_name(), a.getDistrict().get_name(), a.getWard().get_name());
+        AddressResponse addressResponse = new AddressResponse(a.getId(), a.getStreet(), a.getProvince().get_domain(), a.getDistrict().get_prefix() + " " + a.getDistrict().get_name(), a.getWard().get_prefix() + " " + a.getWard().get_name());
         Double starRating = this.hotelService.computeStarRating(hotelEntity.getAveragePoints());
         AverageRatingResponse averageRatingResponse = this.hotelService.getAverageRatingResponse(hotelEntity);
         hotel.setAddress(addressResponse);
@@ -107,7 +107,34 @@ public class HotelController {
         List<RoomResponse> rooms = roomEntities.stream().map(roomEntity -> {
             return mp.map(roomEntity, RoomResponse.class);
         }).collect(Collectors.toList());
-        ProductDetailResponse result = new ProductDetailResponse(hotel, rooms);
+
+        Set<FacilityEntity> facilities = hotelEntity.getFacilities();
+        Set<HotelFacilityGroupResponse> hotelFacilityGroupResponses = new LinkedHashSet<>();
+
+        Set<HotelFacilityGroupEntity> hotelFacilityGroupEntities = new LinkedHashSet<>();
+        facilities.forEach(f -> {
+            HotelFacilityGroupEntity hotelFacilityGroupEntity = f.getHotelFacilityGroup();
+            if(!hotelFacilityGroupEntities.contains(hotelFacilityGroupEntity)){
+                hotelFacilityGroupEntities.add(hotelFacilityGroupEntity);
+            }
+        });
+
+        hotelFacilityGroupEntities.forEach(hfg -> {
+            HotelFacilityGroupResponse hotelFacilityGroupResponse = new HotelFacilityGroupResponse();
+            hotelFacilityGroupResponse.setId(hfg.getId());
+            hotelFacilityGroupResponse.setName(hfg.getName());
+            Set<FacilityResponse> facilityResponses = new LinkedHashSet<>();
+            for (FacilityEntity facility : facilities) {
+                HotelFacilityGroupEntity hotelFacilityGroupEntity = facility.getHotelFacilityGroup();
+                if(hfg == hotelFacilityGroupEntity){
+                    facilityResponses.add(this.mp.map(facility, FacilityResponse.class));
+                }
+            }
+            hotelFacilityGroupResponse.setFacilities(facilityResponses);
+            hotelFacilityGroupResponses.add(hotelFacilityGroupResponse);
+        });
+
+        ProductDetailResponse result = new ProductDetailResponse(hotel, rooms, hotelFacilityGroupResponses);
         return ResponseEntity.ok(result);
 
     }

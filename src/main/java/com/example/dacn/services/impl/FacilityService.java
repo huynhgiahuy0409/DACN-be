@@ -1,5 +1,6 @@
 package com.example.dacn.services.impl;
 
+import com.example.dacn.entity.FacilityEntity;
 import com.example.dacn.entity.HotelEntity;
 import com.example.dacn.entity.ProvinceEntity;
 import com.example.dacn.repository.HotelRepository;
@@ -53,5 +54,10 @@ public class FacilityService implements IFacilityService {
             result.add(item);
         }
         return result;
+    }
+
+    @Override
+    public List<FacilityEntity> findAllByHotelId(Long hotelId) {
+        return null;
     }
 }

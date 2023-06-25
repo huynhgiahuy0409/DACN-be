@@ -21,4 +21,5 @@ public class HotelFacilityGroupEntity extends BaseEntity{
 
     @OneToMany(mappedBy = "hotelFacilityGroup")
     private Set<FacilityEntity> facilities = new LinkedHashSet<FacilityEntity>();
+
 }
