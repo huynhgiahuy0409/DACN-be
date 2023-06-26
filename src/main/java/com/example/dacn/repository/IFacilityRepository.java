@@ -29,5 +29,6 @@ public interface IFacilityRepository extends JpaRepository<FacilityEntity, Long>
             "  AND (:discount IS NULL OR d.discount_percent > :discount)\n" +
             "  AND (:rate IS NULL OR h.average_points > :rate)\n" +
             "group by hf.facility_id, h.id) result on f.id = result.facilityId group by result.facilityId ORDER BY countHotel DESC", nativeQuery = true)
-    public List<Object> findHotelFacilityOptions(@Param("rate") Double rate,@Param("discount") Double discount ,@Param("checkHotelFacilities") Integer checkHotelFacilities,  @Param("hotelFacilities") List<Long> hotelFacilities,@Param("checkBenefits") Integer checkBenefits,  @Param("benefits") List<Long> benefits, @Param("priceFrom") Double priceFrom, @Param("priceTo") Double priceTo, @Param("provinceId") Long provinceId, @Param("maxAdults") Integer maxAdults, @Param("maxChildren") Integer maxChildren, Pageable pageable);
+    public List<Object> findHotelFacilityOptions(@Param("rate") Double rate, @Param("discount") Double discount, @Param("checkHotelFacilities") Integer checkHotelFacilities, @Param("hotelFacilities") List<Long> hotelFacilities, @Param("checkBenefits") Integer checkBenefits, @Param("benefits") List<Long> benefits, @Param("priceFrom") Double priceFrom, @Param("priceTo") Double priceTo, @Param("provinceId") Long provinceId, @Param("maxAdults") Integer maxAdults, @Param("maxChildren") Integer maxChildren, Pageable pageable);
+
 }
