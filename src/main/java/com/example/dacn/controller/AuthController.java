@@ -1,7 +1,9 @@
 package com.example.dacn.controller;
 
+import com.example.dacn.constance.ErrorMessage;
 import com.example.dacn.dto.JWTDTO;
 import com.example.dacn.dto.UserDTO;
+import com.example.dacn.dto.response.ErrorResponse;
 import com.example.dacn.entity.JWTEntity;
 import com.example.dacn.entity.UserEntity;
 import com.example.dacn.enums.Gender;
@@ -18,6 +20,7 @@ import com.example.dacn.services.CustomUserDetailsService;
 import com.example.dacn.services.IHttpHeaderReader;
 import com.example.dacn.services.IJWTService;
 import com.example.dacn.services.IUserService;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -69,36 +72,53 @@ public class AuthController {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
+    @GetMapping("/check-username")
+    public ResponseEntity<Boolean> checkUsername(@RequestParam String username) {
+        UserDetails userDetails;
+        userDetails = this.customUserDetailService.loadUserByUsername(username);
+        if (userDetails != null) {
+            return ResponseEntity.ok(Boolean.TRUE);
+        } else {
+            return ResponseEntity.ok(Boolean.FALSE);
+        }
+    }
+
     @PostMapping("/sign-in")
     public ResponseEntity login(@RequestBody @Valid LoginRequest loginRequest, BindingResult bindingResult) {
-        System.out.println(loginRequest);
-        UserDetails userDetails;
-        userDetails = this.customUserDetailService.loadUserByUsername(loginRequest.getUsername());
+        UserDetails userDetails = this.customUserDetailService.loadUserByUsername(loginRequest.getUsername());
         if (userDetails != null) {
-            if(this.userService.checkPassword(userDetails, loginRequest.getPassword())){
-                // create JWT
-                String accessToken = this.jwtService.generateToken(userDetails, "access");
-                Date expiredAccessToken = this.jwtService.getExpirationDateFromToken(accessToken);
-                String refreshToken = this.jwtService.generateToken(userDetails, "refresh");
-                Date expiredRefreshToken = this.jwtService.getExpirationDateFromToken(refreshToken);
-                JWTEntity accessJWTEntity = new JWTEntity(accessToken, expiredAccessToken);
-                JWTEntity refreshJWTEntity = new JWTEntity(refreshToken, expiredRefreshToken);
-                JWTDTO accessJWTDTO = jwtService.save(accessJWTEntity);
-                JWTDTO refreshJWTDTO = jwtService.save(refreshJWTEntity);
-                System.out.println("cpjwt " + accessJWTDTO.getToken().equals(refreshJWTDTO.getToken()));
-                UserDTO userDTO = this.userService.findByUsernameDTO(userDetails.getUsername());
-                AuthenticationResponse data = new AuthenticationResponse(userDTO, accessJWTDTO, refreshJWTDTO);
-                APIResponse<AuthenticationResponse> response = new APIResponse<>(data, HttpStatus.OK.getReasonPhrase(), HttpStatus.OK.value());
-                return ResponseEntity.ok(response);
-            }else{
-                APIResponse<String> response = new APIResponse<>("Sai mật khẩu", HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST.value());
-                return ResponseEntity.ok(response);
+            if (this.userService.checkPassword(userDetails, loginRequest.getPassword())) {
+                JWTDTO accTokenDTO = this.modelMapper.map(this.jwtService.createToken(userDetails, "access"), JWTDTO.class);
+                JWTDTO refTokenDTO = this.modelMapper.map(this.jwtService.createToken(userDetails, "refresh"), JWTDTO.class);
+                UserDTO userDTO = this.userService.getUserDTO(userDetails.getUsername());
+                AuthenticationResponse data = new AuthenticationResponse(userDTO, accTokenDTO, refTokenDTO);
+                return ResponseEntity.ok(data);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Sai mật khẩu", HttpStatus.BAD_REQUEST));
             }
         } else {
-            APIResponse<String> response = new APIResponse<>("Người dùng chưa được đăng ký", HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.ok(response);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Người dùng chưa được đăng ký", HttpStatus.BAD_REQUEST));
         }
 
+    }
+
+    @GetMapping("/refresh-token")
+    public ResponseEntity refreshTokenCallAPI(@RequestParam String refreshToken) {
+        try {
+            if (StringUtils.hasText(refreshToken) && this.jwtService.validateToken(refreshToken)) {
+                String username = this.jwtService.getUsernameFromToken(refreshToken);
+                UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
+                JWTDTO accTokenDTO = this.modelMapper.map(this.jwtService.createToken(userDetails, "access"), JWTDTO.class);
+                JWTDTO refTokenDTO = this.modelMapper.map(this.jwtService.createToken(userDetails, "refresh"), JWTDTO.class);
+                UserDTO userDTO = this.userService.getUserDTO(userDetails.getUsername());
+                AuthenticationResponse data = new AuthenticationResponse(userDTO, accTokenDTO, refTokenDTO);
+                return ResponseEntity.ok(data);
+            }else{
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Mã không hợp lệ", HttpStatus.BAD_REQUEST));
+            }
+        } catch (ExpiredJwtException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Phiên đăng nhập hết hạn", HttpStatus.BAD_REQUEST));
+        }
     }
 
 //    @PostMapping("/social-sign-in")
@@ -121,9 +141,9 @@ public class AuthController {
 //            newSocialUser.setFullName(socialUserRequest.getName());
 //            newSocialUser.setStatus(UserStatus.ACTIVATED);
 //            newSocialUser.setRole(Role.USER);
-//            user = this.userService.save(newSocialUser);
-//        }else{
-//            user = this.userService.findByUsernameDTO(userDetails.getUsername());
+//            user = this.modelMapper.map(this.userService.save(newSocialUser), UserDTO.class);
+//        } else {
+//            user = this.userService.getUserDTO(userDetails.getUsername());
 //        }
 //        System.out.println(userDetails);
 //        String accessToken = this.jwtService.generateToken(userDetails, "access");
@@ -132,82 +152,38 @@ public class AuthController {
 //        Date expiredRefreshToken = this.jwtService.getExpirationDateFromToken(refreshToken);
 //        JWTEntity accessJWTEntity = new JWTEntity(accessToken, expiredAccessToken);
 //        JWTEntity refreshJWTEntity = new JWTEntity(refreshToken, expiredRefreshToken);
-//        JWTDTO accessJWTDTO = jwtService.save(accessJWTEntity);
-//        JWTDTO refreshJWTDTO = jwtService.save(refreshJWTEntity);
+//        JWTDTO accessJWTDTO = this.modelMapper.map(jwtService.save(accessJWTEntity), JWTDTO.class);
+//        JWTDTO refreshJWTDTO = this.modelMapper.map(jwtService.save(refreshJWTEntity), JWTDTO.class);
 //        AuthenticationResponse data = new AuthenticationResponse(user, accessJWTDTO, refreshJWTDTO);
 //        APIResponse<AuthenticationResponse> response = new APIResponse<>(data, HttpStatus.OK.getReasonPhrase(), HttpStatus.OK.value());
 //        return ResponseEntity.ok(response);
 //    }
 
 
-    @PostMapping("/validate-sign-up")
+    @PostMapping(value = "/validate-sign-up")
     public ResponseEntity validSignUp(@RequestBody SignUpRequest signUpRequest) {
-        System.out.println(signUpRequest);
         boolean isValidPassword = this.userService.checkValidPassword(signUpRequest.getPassword());
         boolean isExistUser = this.userService.checkExistUser(signUpRequest.getUsername());
         if (isExistUser) {
             UserEntity foundUser = this.userService.findByUsername(signUpRequest.getUsername());
             if (foundUser.getStatus().equals(UserStatus.UNACTIVATED)) {
-                foundUser.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-                foundUser.setPhone(signUpRequest.getPhone());
-                foundUser.setFullName(signUpRequest.getFullName());
-                foundUser.setEmail(signUpRequest.getUsername());
-                foundUser.setGender(Gender.MALE);
-                this.userService.save(foundUser);
-                APIResponse<String> response = new APIResponse<String>("Thông tin hợp lệ", HttpStatus.OK.getReasonPhrase(), HttpStatus.OK.value());
-                return ResponseEntity.ok(response);
+                UserEntity unActiveUser = this.userService.generateUser(signUpRequest, UserStatus.UNACTIVATED);
+                this.userService.save(unActiveUser);
+                return ResponseEntity.ok("Xác thực thông tin hợp lệ");
             } else {
-                APIResponse<String> response = new APIResponse<String>("Tài khoản đã tồn tại", HttpStatus.CONFLICT.getReasonPhrase(), HttpStatus.CONFLICT.value());
-                return ResponseEntity.ok(response);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Tài khoản đã tồn tại");
             }
         } else {
             if (isValidPassword) {
-                APIResponse<String> response = new APIResponse<String>("Thông tin hợp lệ", HttpStatus.OK.getReasonPhrase(), HttpStatus.OK.value());
-                UserEntity nonActiveUser = new UserEntity();
-                nonActiveUser.setUsername(signUpRequest.getUsername());
-                nonActiveUser.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-                nonActiveUser.setPhone(signUpRequest.getPhone());
-                nonActiveUser.setFullName(signUpRequest.getFullName());
-                nonActiveUser.setEmail(signUpRequest.getUsername());
-                nonActiveUser.setGender(Gender.MALE);
-                nonActiveUser.setStatus(UserStatus.UNACTIVATED);
-                nonActiveUser.setProvider(OAuthProvider.APPLICATION);
-                this.userService.save(nonActiveUser);
-                return ResponseEntity.ok(response);
+                UserEntity unActiveUser = this.userService.generateUser(signUpRequest, UserStatus.UNACTIVATED);
+                this.userService.save(unActiveUser);
+                return ResponseEntity.ok("Xác thực thông tin hợp lệ");
             } else {
-                APIResponse<String> response = new APIResponse<String>("Mật khẩu không hợp lệ", HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST.value());
-                return ResponseEntity.ok(response);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Mật khẩu không hợp lệ");
             }
         }
     }
 
-    @GetMapping("/refresh-access-token")
-    public ResponseEntity refreshAccessToken(HttpServletRequest request) {
-        System.out.println("rft");
-        String refreshToken = this.httpHeaderReader.getTokenFromHeader(request);
-        System.out.println("rft " + refreshToken);
-        if (StringUtils.hasText(refreshToken) && this.jwtService.validateToken(refreshToken)) {
-            String username = this.jwtService.getUsernameFromToken(refreshToken);
-            UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
-            String newAccessToken = this.jwtService.generateToken(userDetails, "access");
-            String newRefreshToken = this.jwtService.generateToken(userDetails, "refresh");
-            Date expiredNewAccessToken = this.jwtService.getExpirationDateFromToken(newAccessToken);
-            Date expiredNewRefreshToken = this.jwtService.getExpirationDateFromToken(newRefreshToken);
-            JWTEntity newAccessTokenEntity = new JWTEntity(newAccessToken, expiredNewAccessToken);
-            JWTEntity foundRefreshTokenEntity = this.jwtService.findByToken(refreshToken);
-            foundRefreshTokenEntity.setToken(newRefreshToken);
-            foundRefreshTokenEntity.setTokenExpirationDate(expiredNewRefreshToken);
-            JWTDTO newAccessTokenDTO = jwtService.save(newAccessTokenEntity);
-            JWTDTO foundRefreshTokenDTO = jwtService.save(foundRefreshTokenEntity);
-            UserDTO userDTO = this.userService.findByUsernameDTO(userDetails.getUsername());
-            AuthenticationResponse data = new AuthenticationResponse(userDTO, newAccessTokenDTO, foundRefreshTokenDTO);
-            APIResponse<AuthenticationResponse> response = new APIResponse<>(data, HttpStatus.OK.getReasonPhrase(), HttpStatus.OK.value());
-            return ResponseEntity.ok(response);
-        } else {
-            APIResponse<String> response = new APIResponse<String>("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại", HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.ok(response);
-        }
-    }
 
     @PostMapping(value = "/revoke-token")
     public ResponseEntity revokeToken(HttpServletRequest request, @RequestBody String refreshToken) {
@@ -228,18 +204,15 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/check-activated-user")
-    public ResponseEntity checkActivatedUser(@RequestBody String username) {
+    @PostMapping("/validate-username")
+    public ResponseEntity checkActivatedUser(@RequestParam String username) {
         UserEntity foundUser = this.userService.findByUsername(username);
         if (foundUser != null && foundUser.getStatus().equals(UserStatus.ACTIVATED)) {
-            APIResponse<String> response = new APIResponse<String>(null, HttpStatus.OK.getReasonPhrase(), HttpStatus.OK.value());
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok("Tên tài khoản hợp lệ");
         } else if (foundUser != null && foundUser.getStatus().equals(UserStatus.BANNED)) {
-            APIResponse<String> response = new APIResponse<String>("Tài khoản của bạn đã bị khoá", HttpStatus.FORBIDDEN.getReasonPhrase(), HttpStatus.FORBIDDEN.value());
-            return ResponseEntity.ok(response);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Tên tài khoản đã bị khoá");
         } else {
-            APIResponse<String> response = new APIResponse<String>("Tài khoản không tồn tại", HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.ok(response);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Tài khoản không tồn tại");
         }
     }
 
@@ -249,11 +222,9 @@ public class AuthController {
         if (foundUser != null && foundUser.getStatus().equals(UserStatus.ACTIVATED) && this.userService.checkValidPassword(forgetPasswordRequest.getNewPassword())) {
             foundUser.setPassword(passwordEncoder.encode(forgetPasswordRequest.getNewPassword()));
             this.userService.save(foundUser);
-            APIResponse<String> response = new APIResponse<String>("Đổi mật khẩu thành công", HttpStatus.OK.getReasonPhrase(), HttpStatus.OK.value());
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok("Đổi mật khẩu thành công");
         } else {
-            APIResponse<String> response = new APIResponse<String>("Đổi mật khẩu không thành công", HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.ok(response);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorMessage.US_ERROR);
         }
     }
 }

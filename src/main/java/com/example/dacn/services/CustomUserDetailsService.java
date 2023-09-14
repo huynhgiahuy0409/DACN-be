@@ -31,8 +31,9 @@ public class CustomUserDetailsService implements UserDetailsService {
             }
             user = new User(username, userEntity.getPassword(), roles);
             return user;
+        }else{
+            return null;
         }
-        throw new UsernameNotFoundException("Tài khoản không tồn tại");
     }
 }
 

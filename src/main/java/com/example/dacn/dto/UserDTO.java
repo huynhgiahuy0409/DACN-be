@@ -27,4 +27,6 @@ public class UserDTO {
     private String phone;
     private OAuthProvider provider;
     private Date createdDate;
+    private String avatarUrl;
+    private String coverUrl;
 }

@@ -1,5 +1,6 @@
 package com.example.dacn.controller;
 
+import com.example.dacn.constance.ErrorMessage;
 import com.example.dacn.constance.SystemConstance;
 import com.example.dacn.entity.UserEntity;
 import com.example.dacn.enums.OTPType;
@@ -40,59 +41,62 @@ public class OTPController {
 
     @GetMapping("/generate-otp")
     public ResponseEntity generateOTP(@RequestParam String username, @RequestParam OTPType otpType) {
-        System.out.println(otpType);
-        System.out.println(otpType.equals(OTPType.REGISTER));
-        int generatedOTPNumber;
-        if(otpType.equals(OTPType.REGISTER)){
-            generatedOTPNumber = this.registerOTPService.generateOTP(username);
-        }else{
-            generatedOTPNumber = this.changePasswordOTPService.generateOTP(username);
-        }
-        MailTemplate mailTemplate = new MailTemplate(this.mailHTMLPath);
-        Map<String, String> replacements = new HashMap<String, String>();
-        replacements.put("username", username);
-        replacements.put("OTPNumber", String.valueOf(generatedOTPNumber));
-        replacements.put("applicationName", SystemConstance.APPLICATION_NAME);
-        String message = mailTemplate.getTemplate(replacements);
         try {
-            this.javaMailSenderService.sendOTPMessage(username, "Hotel Booking: Confirm OTP to sign up", message);
-            APIResponse<String> response = new APIResponse<>("Mã xác thực đã được gửi đến email của bạn", HttpStatus.CREATED.getReasonPhrase(), HttpStatus.CREATED.value());
-            return ResponseEntity.ok(response);
-        } catch (MessagingException e) {
-            APIResponse<String> response = new APIResponse<>("Đã xảy ra lỗi. Vui lòng thử lại", HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-            return ResponseEntity.ok(response);
+            int generatedOTPNumber;
+            String subject;
+            if (otpType.equals(OTPType.REGISTER)) {
+                generatedOTPNumber = this.registerOTPService.generateOTP(username);
+                subject = SystemConstance.APPLICATION_NAME.concat(": Confirm OTP to sign up");
+            } else {
+                generatedOTPNumber = this.changePasswordOTPService.generateOTP(username);
+                subject = SystemConstance.APPLICATION_NAME.concat(": Confirm OTP to change your password");
+            }
+            MailTemplate mailTemplate = new MailTemplate(this.mailHTMLPath);
+            Map<String, String> replacements = new HashMap<String, String>();
+            replacements.put("username", username);
+            replacements.put("OTPNumber", String.valueOf(generatedOTPNumber));
+            replacements.put("applicationName", SystemConstance.APPLICATION_NAME);
+            String message = mailTemplate.getTemplate(replacements);
+            this.javaMailSenderService.sendOTPMessage(username, subject, message);
+            return ResponseEntity.ok("Mã xác thực đã được gửi đến email của bạn");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorMessage.US_ERROR);
         }
     }
 
     @GetMapping("/validate-otp")
     public ResponseEntity validateOtp(@RequestParam String username, @RequestParam int OTPNumber, @RequestParam OTPType otpType) {
         int foundOTPNUmber;
-        if(otpType.equals(OTPType.REGISTER)){
+        System.out.println("validateOtp");
+        if (otpType.equals(OTPType.REGISTER)) {
             foundOTPNUmber = this.registerOTPService.getOTP(username);
-        }else{
+        } else {
             foundOTPNUmber = this.changePasswordOTPService.getOTP(username);
         }
-        if (foundOTPNUmber > 0) {
-            if (OTPNumber == foundOTPNUmber) {
-                if(otpType.equals(OTPType.REGISTER)){
-                    UserEntity foundUser = this.userService.findByUsername(username);
-                    foundUser.setStatus(UserStatus.ACTIVATED);
-                    this.userService.save(foundUser);
-                    this.registerOTPService.clearOTP(username);
-                }else{
-                    this.changePasswordOTPService.clearOTP(username);
+        try {
+            if (foundOTPNUmber > 0) {
+                if (OTPNumber == foundOTPNUmber) {
+                    if (otpType.equals(OTPType.REGISTER)) {
+                        UserEntity foundUser = this.userService.findByUsername(username);
+                        foundUser.setStatus(UserStatus.ACTIVATED);
+                        this.userService.save(foundUser);
+                        this.registerOTPService.clearOTP(username);
+                    } else {
+                        this.changePasswordOTPService.clearOTP(username);
+                    }
+                    return ResponseEntity.ok("Xác thực thành công");
+                } else {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sai mã xác thực");
                 }
-                APIResponse<String> response = new APIResponse<>("Xác thực thành công", HttpStatus.OK.getReasonPhrase(), HttpStatus.OK.value());
-                return ResponseEntity.ok(response);
             } else {
-                APIResponse<String> response = new APIResponse<>("Mã xác thực không hợp lệ. Vui lòng thử lại", HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST.value());
-                return ResponseEntity.ok(response);
+                return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Mã xác thực không hợp lệ hoặc đã hết hạn");
             }
-        } else {
-            APIResponse<String> response = new APIResponse<>("Mã xác thực không hợp lệ hoặc đã hết hạn. Vui lòng thử lại", HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase(), HttpStatus.UNPROCESSABLE_ENTITY.value());
-            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorMessage.US_ERROR);
         }
+
     }
+
     @GetMapping(value = "/forget-password")
     public ResponseEntity<Boolean> changePassword(@RequestBody String username) {
         if (!StringUtils.isEmpty(username)) {

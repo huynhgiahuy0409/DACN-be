@@ -3,6 +3,8 @@ package com.example.dacn.services;
 import com.example.dacn.dto.GuestDTO;
 import com.example.dacn.dto.UserDTO;
 import com.example.dacn.entity.UserEntity;
+import com.example.dacn.enums.UserStatus;
+import com.example.dacn.requestmodel.SignUpRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public interface IUserService {
@@ -23,5 +25,7 @@ public interface IUserService {
 
     UserEntity saveGuest(GuestDTO guest);
 
+    UserEntity generateUser(SignUpRequest req, UserStatus status);
 
+    UserDTO getUserDTO(String username);
 }

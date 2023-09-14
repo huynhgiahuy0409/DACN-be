@@ -30,9 +30,8 @@ public class JWTService implements IJWTService {
     private ModelMapper mp;
 
     @Override
-    public JWTDTO save(JWTEntity jwt) {
-        JWTEntity savedJWT = jwtRepository.save(jwt);
-        return this.mp.map(savedJWT, JWTDTO.class);
+    public JWTEntity save(JWTEntity jwt) {
+        return jwtRepository.save(jwt);
     }
 
     @Override
@@ -74,22 +73,15 @@ public class JWTService implements IJWTService {
     }
 
     @Override
-    public boolean validateToken(String token) {
-        System.out.println(token);
+    public boolean validateToken(String token) throws ExpiredJwtException {
         JWTEntity foundJwtEntity = this.jwtRepository.findByToken(token);
-        try {
-            if (foundJwtEntity != null && foundJwtEntity.getToken().equals(token)) {
-                Jwts.parser()
-                        .setSigningKey(SystemConstance.SECRET_KEY)
-                        .setAllowedClockSkewSeconds(60)
-                        .parseClaimsJws(token);
-                return true;
-            } else {
-                return false;
-            }
-        } catch (Exception e) {
-            // handle exception
-            System.out.println(e.getMessage());
+        if (foundJwtEntity != null && foundJwtEntity.getToken().equals(token)) {
+            Jwts.parser()
+                    .setSigningKey(SystemConstance.SECRET_KEY)
+                    .setAllowedClockSkewSeconds(60)
+                    .parseClaimsJws(token);
+            return true;
+        } else {
             return false;
         }
     }
@@ -142,5 +134,13 @@ public class JWTService implements IJWTService {
             // Handle exception
             System.out.println(ex);
         }
+    }
+
+    @Override
+    public JWTEntity createToken(UserDetails userDetails, String type) {
+        String token = this.generateToken(userDetails, type);
+        Date accessTime = this.getExpirationDateFromToken(token);
+        JWTEntity savedToken = this.save(new JWTEntity(token, accessTime));
+        return savedToken;
     }
 }

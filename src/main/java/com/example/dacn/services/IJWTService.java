@@ -14,7 +14,7 @@ import java.util.Map;
 
 public interface IJWTService {
 
-    JWTDTO save(JWTEntity token);
+    JWTEntity save(JWTEntity token);
 
     JWTEntity findByToken(String token);
 
@@ -35,4 +35,6 @@ public interface IJWTService {
     boolean isTokenExpired(String token);
 
     void parseGoogleJwt(String jwt);
+
+    JWTEntity createToken(UserDetails userDetails, String type);
 }

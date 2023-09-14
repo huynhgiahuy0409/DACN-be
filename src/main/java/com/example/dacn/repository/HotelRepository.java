@@ -129,8 +129,8 @@ public interface HotelRepository extends JpaRepository<HotelEntity, Long>, JpaSp
 //    JOIN
 //            (SELECT h.id as hotelId, h.name as hotelName, min(rental_price) as minPrice, r.id as roomId, r.rental_price, r.max_adults, r.max_children, h.average_points as rate, d.discount_percent as discountPercent
 //    FROM hotel h
-//    JOIN address a on h.address_id = a.id
-//    JOIN province p on a.province_id = p.id
+//    JOIN address docker-compose.yml on h.address_id = docker-compose.yml.id
+//    JOIN province p on docker-compose.yml.province_id = p.id
 //    JOIN room r ON r.hotel_id = h.id
 //    JOIN hotel_facility as hf ON hf.hotel_id = h.id
 //    JOIN discount d on r.discount_id = d.id

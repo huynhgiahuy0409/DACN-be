@@ -1,9 +1,20 @@
 package com.example.dacn.services.impl;
 
+import com.example.dacn.constance.SystemConstance;
 import com.example.dacn.dto.GuestDTO;
 import com.example.dacn.dto.UserDTO;
+import com.example.dacn.entity.UserAvatarEntity;
+import com.example.dacn.entity.UserCoversEntity;
 import com.example.dacn.entity.UserEntity;
+import com.example.dacn.enums.Gender;
+import com.example.dacn.enums.ImageStatus;
+import com.example.dacn.enums.OAuthProvider;
+import com.example.dacn.enums.UserStatus;
+import com.example.dacn.repository.IUserAvatarRepository;
 import com.example.dacn.repository.IUserRepository;
+import com.example.dacn.requestmodel.SignUpRequest;
+import com.example.dacn.services.IUserAvatarService;
+import com.example.dacn.services.IUserCoverService;
 import com.example.dacn.services.IUserService;
 import com.example.dacn.specification.UserSpecification;
 import org.modelmapper.ModelMapper;
@@ -13,6 +24,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -26,14 +39,22 @@ public class UserService implements IUserService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private IUserRepository userRepository;
+    @Autowired
+    private IUserCoverService userCoverService;
+    @Autowired
+    private IUserAvatarService userAvatarService;
 
     @Autowired
     private ModelMapper mp;
+
 
     @Override
     public UserDTO findByUsernameDTO(String username) {
         return this.mp.map(this.userRepository.findByUsername(username), UserDTO.class);
     }
+    @Autowired
+    private IUserAvatarRepository userAvatarRepository;
+
 
     @Override
     public UserEntity findByUsername(String username) {
@@ -59,7 +80,7 @@ public class UserService implements IUserService {
     public boolean checkValidPassword(String password) {
         String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,20}$";
        /* (?=.*[0-9]): Chuỗi phải chứa ít nhất một số.
-        (?=.*[a-z]): Chuỗi phải chứa ít nhất một chữ thường.
+        (?=.*[docker-compose.yml-z]): Chuỗi phải chứa ít nhất một chữ thường.
         (?=.*[A-Z]): Chuỗi phải chứa ít nhất một chữ hoa.
         (?=.*[@#$%^&+=!]): Chuỗi phải chứa ít nhất một ký tự đặc biệt.
         (?=\S+$): Không chứa khoảng trắng.
@@ -106,5 +127,38 @@ public class UserService implements IUserService {
                 .phone(guest.getPhone())
                 .build();
         return userRepository.save(user);
+    }
+
+    @Override
+    public UserEntity generateUser(SignUpRequest req, UserStatus status) {
+        UserEntity user = new UserEntity();
+        user.setUsername(req.getUsername());
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setPhone(req.getPhone());
+        user.setFullName(req.getFullName());
+        user.setEmail(req.getUsername());
+        user.setGender(Gender.MALE);
+        user.setStatus(status);
+        user.setProvider(OAuthProvider.APPLICATION);
+        UserAvatarEntity avatar = new UserAvatarEntity(SystemConstance.DEFAULT_AVATAR_IMAGE_NAME, ImageStatus.ACTIVE, user);
+        UserCoversEntity cover = new UserCoversEntity(SystemConstance.DEFAULT_COVER_IMAGE_NAME, ImageStatus.ACTIVE, user);
+        Collection<UserAvatarEntity> avatars = new LinkedHashSet();
+        Collection<UserCoversEntity> covers = new LinkedHashSet();
+        avatars.add(avatar);
+        covers.add(cover);
+        user.setAvatars(avatars);
+        user.setCovers(covers);
+        return user;
+    }
+
+    @Override
+    public UserDTO getUserDTO(String username) {
+        UserEntity user = this.findByUsername(username);
+        UserAvatarEntity avatar = this.userAvatarRepository.findByUserUsernameAndStatus(user.getUsername(), ImageStatus.ACTIVE);
+        UserCoversEntity cover = this.userCoverService.findByUsernameAndStatus(user.getUsername(), ImageStatus.ACTIVE);
+        UserDTO userDTO = this.mp.map(user, UserDTO.class);
+        userDTO.setAvatarUrl(avatar.getImageUrl());
+        userDTO.setCoverUrl(cover.getImageUrl());
+        return userDTO;
     }
 }

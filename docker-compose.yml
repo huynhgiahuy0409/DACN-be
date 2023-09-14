@@ -1,0 +1,29 @@
+services:
+  mysqldb:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rental_car
+      MYSQL_DATABASE: elhnhxqj_rental_car_secondary
+    volumes:
+      - booking-hotel-db-vl:/var/lib/mysql
+  app:
+    depends_on:
+      - mysqldb
+    build: ./
+    ports:
+      - 127.0.0.1:8080:8080
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.datasource.url"  : "jdbc:mysql://45.252.250.6:3306/elhnhxqj_rental_car_secondary",
+        "spring.datasource.username" : "elhnhxqj_rental_car",
+        "spring.datasource.password" : "rental_car",
+        "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL5Dialect",
+        "spring.jpa.hibernate.ddl-auto" : "update"
+      }'
+    volumes:
+      - ./:/app
+    stdin_open: true
+    tty: true
+
+volumes:
+  booking-hotel-db-vl:

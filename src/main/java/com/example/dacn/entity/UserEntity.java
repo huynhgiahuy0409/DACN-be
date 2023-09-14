@@ -10,6 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -51,4 +52,9 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<FavoriteHotelEntity> favoriteHotels = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Collection<UserAvatarEntity> avatars;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Collection<UserCoversEntity> covers;
 }
