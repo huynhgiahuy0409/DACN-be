@@ -29,4 +29,5 @@ public class UserDTO {
     private Date createdDate;
     private String avatarUrl;
     private String coverUrl;
+    private String socialAvatar;
 }

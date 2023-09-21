@@ -1,6 +1,7 @@
 package com.example.dacn.controller;
 
 import com.example.dacn.constance.ErrorMessage;
+import com.example.dacn.constance.SystemConstance;
 import com.example.dacn.dto.JWTDTO;
 import com.example.dacn.dto.UserDTO;
 import com.example.dacn.dto.response.ErrorResponse;
@@ -14,6 +15,7 @@ import com.example.dacn.requestmodel.ForgetPasswordRequest;
 import com.example.dacn.requestmodel.LoginRequest;
 import com.example.dacn.requestmodel.SignUpRequest;
 //import com.example.dacn.requestmodel.SocialUserRequest;
+import com.example.dacn.requestmodel.SocialUserRequest;
 import com.example.dacn.responsemodel.APIResponse;
 import com.example.dacn.responsemodel.AuthenticationResponse;
 import com.example.dacn.services.CustomUserDetailsService;
@@ -72,17 +74,6 @@ public class AuthController {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
-    @GetMapping("/check-username")
-    public ResponseEntity<Boolean> checkUsername(@RequestParam String username) {
-        UserDetails userDetails;
-        userDetails = this.customUserDetailService.loadUserByUsername(username);
-        if (userDetails != null) {
-            return ResponseEntity.ok(Boolean.TRUE);
-        } else {
-            return ResponseEntity.ok(Boolean.FALSE);
-        }
-    }
-
     @PostMapping("/sign-in")
     public ResponseEntity login(@RequestBody @Valid LoginRequest loginRequest, BindingResult bindingResult) {
         UserDetails userDetails = this.customUserDetailService.loadUserByUsername(loginRequest.getUsername());
@@ -108,12 +99,18 @@ public class AuthController {
             if (StringUtils.hasText(refreshToken) && this.jwtService.validateToken(refreshToken)) {
                 String username = this.jwtService.getUsernameFromToken(refreshToken);
                 UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
+                UserEntity foundUser = this.userService.findByUsername(username);
                 JWTDTO accTokenDTO = this.modelMapper.map(this.jwtService.createToken(userDetails, "access"), JWTDTO.class);
                 JWTDTO refTokenDTO = this.modelMapper.map(this.jwtService.createToken(userDetails, "refresh"), JWTDTO.class);
-                UserDTO userDTO = this.userService.getUserDTO(userDetails.getUsername());
-                AuthenticationResponse data = new AuthenticationResponse(userDTO, accTokenDTO, refTokenDTO);
-                return ResponseEntity.ok(data);
-            }else{
+                UserDTO userDTO;
+                if (foundUser.getProvider().equals(OAuthProvider.APPLICATION)) {
+                    userDTO = this.userService.getUserDTO(userDetails.getUsername());
+                    AuthenticationResponse data = new AuthenticationResponse(userDTO, accTokenDTO, refTokenDTO);
+                    return ResponseEntity.ok(data);
+                } else {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Phiên đăng nhập hết hạn", HttpStatus.BAD_REQUEST));
+                }
+            } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Mã không hợp lệ", HttpStatus.BAD_REQUEST));
             }
         } catch (ExpiredJwtException e) {
@@ -121,43 +118,39 @@ public class AuthController {
         }
     }
 
-//    @PostMapping("/social-sign-in")
-//    public ResponseEntity signInWithGoogle(@RequestBody SocialUserRequest socialUserRequest) {
-//        System.out.println(socialUserRequest);
-//        String id = socialUserRequest.getId();
-//        OAuthProvider provider = socialUserRequest.getProvider();
-//        UserDetails userDetails;
-//        userDetails = this.customUserDetailService.loadUserByUsername(id);
-//        UserDTO user;
-//        if (userDetails == null) {
-//            List<SimpleGrantedAuthority> roles = new ArrayList<SimpleGrantedAuthority>();
-//            roles.add(new SimpleGrantedAuthority(Role.USER.name()));
-//            userDetails = new User(id, "", roles);
-//            UserEntity newSocialUser = new UserEntity();
-//            newSocialUser.setUsername(id);
-//            newSocialUser.setPassword("");
-//            newSocialUser.setEmail(socialUserRequest.getEmail());
-//            newSocialUser.setProvider(provider);
-//            newSocialUser.setFullName(socialUserRequest.getName());
-//            newSocialUser.setStatus(UserStatus.ACTIVATED);
-//            newSocialUser.setRole(Role.USER);
-//            user = this.modelMapper.map(this.userService.save(newSocialUser), UserDTO.class);
-//        } else {
-//            user = this.userService.getUserDTO(userDetails.getUsername());
-//        }
-//        System.out.println(userDetails);
-//        String accessToken = this.jwtService.generateToken(userDetails, "access");
-//        Date expiredAccessToken = this.jwtService.getExpirationDateFromToken(accessToken);
-//        String refreshToken = this.jwtService.generateToken(userDetails, "refresh");
-//        Date expiredRefreshToken = this.jwtService.getExpirationDateFromToken(refreshToken);
-//        JWTEntity accessJWTEntity = new JWTEntity(accessToken, expiredAccessToken);
-//        JWTEntity refreshJWTEntity = new JWTEntity(refreshToken, expiredRefreshToken);
-//        JWTDTO accessJWTDTO = this.modelMapper.map(jwtService.save(accessJWTEntity), JWTDTO.class);
-//        JWTDTO refreshJWTDTO = this.modelMapper.map(jwtService.save(refreshJWTEntity), JWTDTO.class);
-//        AuthenticationResponse data = new AuthenticationResponse(user, accessJWTDTO, refreshJWTDTO);
-//        APIResponse<AuthenticationResponse> response = new APIResponse<>(data, HttpStatus.OK.getReasonPhrase(), HttpStatus.OK.value());
-//        return ResponseEntity.ok(response);
-//    }
+    @PostMapping("/social-sign-in")
+    public ResponseEntity signInWithGoogle(@RequestBody SocialUserRequest socialUserRequest) {
+        String id = socialUserRequest.getId();
+        OAuthProvider provider = socialUserRequest.getProvider();
+        UserDetails userDetails;
+        userDetails = this.customUserDetailService.loadUserByUsername(id);
+        UserDTO user;
+        if (userDetails == null) {
+            List<SimpleGrantedAuthority> roles = new ArrayList<SimpleGrantedAuthority>();
+            roles.add(new SimpleGrantedAuthority(Role.USER.name()));
+            userDetails = new User(id, "", roles);
+            UserEntity newSocialUser = new UserEntity();
+            newSocialUser.setUsername(id);
+            newSocialUser.setPassword("");
+            newSocialUser.setEmail(socialUserRequest.getEmail());
+            newSocialUser.setProvider(provider);
+            newSocialUser.setFullName(socialUserRequest.getName());
+            newSocialUser.setStatus(UserStatus.ACTIVATED);
+            user = this.modelMapper.map(this.userService.save(newSocialUser), UserDTO.class);
+        } else {
+            user = this.userService.getUserDTO(userDetails.getUsername(), socialUserRequest.getPhotoUrl());
+        }
+        String accessToken = this.jwtService.generateToken(userDetails, "access");
+        Date expiredAccessToken = this.jwtService.getExpirationDateFromToken(accessToken);
+        String refreshToken = this.jwtService.generateToken(userDetails, "refresh");
+        Date expiredRefreshToken = this.jwtService.getExpirationDateFromToken(refreshToken);
+        JWTEntity accessJWTEntity = new JWTEntity(accessToken, expiredAccessToken);
+        JWTEntity refreshJWTEntity = new JWTEntity(refreshToken, expiredRefreshToken);
+        JWTDTO accessJWTDTO = this.modelMapper.map(jwtService.save(accessJWTEntity), JWTDTO.class);
+        JWTDTO refreshJWTDTO = this.modelMapper.map(jwtService.save(refreshJWTEntity), JWTDTO.class);
+        AuthenticationResponse data = new AuthenticationResponse(user, accessJWTDTO, refreshJWTDTO);
+        return ResponseEntity.ok(data);
+    }
 
 
     @PostMapping(value = "/validate-sign-up")
@@ -187,24 +180,18 @@ public class AuthController {
 
     @PostMapping(value = "/revoke-token")
     public ResponseEntity revokeToken(HttpServletRequest request, @RequestBody String refreshToken) {
-        try {
-            String accessToken = this.httpHeaderReader.getTokenFromHeader(request);
-            Long removedAccess = this.jwtService.removeByToken(accessToken);
-            Long removedRefresh = this.jwtService.removeByToken(refreshToken);
-            if (removedAccess.longValue() != -1 && removedAccess.longValue() != -1) {
-                APIResponse<String> response = new APIResponse<String>("Thu hồi thành công", HttpStatus.OK.getReasonPhrase(), HttpStatus.OK.value());
-                return ResponseEntity.ok(response);
-            } else {
-                APIResponse<String> response = new APIResponse<String>("Thu hồi thất bại", HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST.value());
-                return ResponseEntity.ok(response);
-            }
-        } catch (Exception e) {
-            APIResponse<String> response = new APIResponse<String>("Thu hồi thất bại", HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.ok(response);
+        String accessToken = this.httpHeaderReader.getTokenFromHeader(request);
+        Long removedAccess = this.jwtService.removeByToken(accessToken);
+        Long removedRefresh = this.jwtService.removeByToken(refreshToken);
+        if (removedAccess.longValue() != -1 && removedAccess.longValue() != -1) {
+            return ResponseEntity.ok(true);
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi hệ thống");
         }
+
     }
 
-    @PostMapping("/validate-username")
+    @PostMapping("/validate-user")
     public ResponseEntity checkActivatedUser(@RequestParam String username) {
         UserEntity foundUser = this.userService.findByUsername(username);
         if (foundUser != null && foundUser.getStatus().equals(UserStatus.ACTIVATED)) {

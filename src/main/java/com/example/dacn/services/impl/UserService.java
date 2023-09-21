@@ -52,6 +52,7 @@ public class UserService implements IUserService {
     public UserDTO findByUsernameDTO(String username) {
         return this.mp.map(this.userRepository.findByUsername(username), UserDTO.class);
     }
+
     @Autowired
     private IUserAvatarRepository userAvatarRepository;
 
@@ -154,11 +155,20 @@ public class UserService implements IUserService {
     @Override
     public UserDTO getUserDTO(String username) {
         UserEntity user = this.findByUsername(username);
+        UserDTO userDTO = this.mp.map(user, UserDTO.class);
         UserAvatarEntity avatar = this.userAvatarRepository.findByUserUsernameAndStatus(user.getUsername(), ImageStatus.ACTIVE);
         UserCoversEntity cover = this.userCoverService.findByUsernameAndStatus(user.getUsername(), ImageStatus.ACTIVE);
-        UserDTO userDTO = this.mp.map(user, UserDTO.class);
         userDTO.setAvatarUrl(avatar.getImageUrl());
         userDTO.setCoverUrl(cover.getImageUrl());
         return userDTO;
     }
+
+    @Override
+    public UserDTO getUserDTO(String username, String socialAvatarUrl) {
+        UserEntity user = this.findByUsername(username);
+        UserDTO userDTO = this.mp.map(user, UserDTO.class);
+        userDTO.setAvatarUrl(socialAvatarUrl);
+        return userDTO;
+    }
+
 }

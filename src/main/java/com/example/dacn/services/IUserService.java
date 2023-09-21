@@ -28,4 +28,5 @@ public interface IUserService {
     UserEntity generateUser(SignUpRequest req, UserStatus status);
 
     UserDTO getUserDTO(String username);
+    UserDTO getUserDTO(String username, String socialAvatarUrl);
 }

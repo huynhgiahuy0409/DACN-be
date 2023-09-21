@@ -35,13 +35,10 @@ public class UserEntity {
     @Enumerated(EnumType.ORDINAL)
     private UserStatus status;
 
-    @Enumerated(EnumType.ORDINAL)
-    private Role role;
-
     private OAuthProvider provider;
-//    @ManyToOne
-//    @JoinColumn(name = "role_id")
-//    private RoleEntity role;
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private RoleEntity role;
 
 
     @OneToMany(mappedBy = "user")
