@@ -1,5 +1,5 @@
 # Specialized Project subject - Booking Hotel API
-Technique: Spring Boot version 2.3.2.RELEASE
+Technique: Spring Boot (version 2.3.2.RELEASE)
 # Prerequisites
 1. Run `mvn clean install ` to install dependences
 ## Run the Spring Boot Application:
