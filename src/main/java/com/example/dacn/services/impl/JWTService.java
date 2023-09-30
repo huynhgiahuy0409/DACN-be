@@ -60,14 +60,17 @@ public class JWTService implements IJWTService {
 
     @Override
     public String doGenerateToken(Map<String, Object> claims, String subject, String type) {
+        Random random = new Random();
+        int randomInt = random.nextInt(10000);
+        long randomLong = (long) randomInt;
         if (type == "access") {
             return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
-                    .setExpiration(new Date(System.currentTimeMillis() + SystemConstance.EXPIRATION_TIME))
+                    .setExpiration(new Date(System.currentTimeMillis() + SystemConstance.EXPIRATION_TIME + randomLong))
                     .signWith(SignatureAlgorithm.HS512, SystemConstance.SECRET_KEY).compact();
         } else {
             // refresh
             return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
-                    .setExpiration(new Date(System.currentTimeMillis() + SystemConstance.REFRESH_TIME))
+                    .setExpiration(new Date(System.currentTimeMillis() + SystemConstance.REFRESH_TIME + randomLong))
                     .signWith(SignatureAlgorithm.HS512, SystemConstance.SECRET_KEY).compact();
         }
     }
